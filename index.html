@@ -440,7 +440,7 @@ function parseWords(payload){let d=payload;if(!Array.isArray(d)){d=d.words||d.da
 const referenceVerifiedWords=['とうえいが','とうえいき','とうかいぎ','とうけいじ'];
 // Two reported omissions are available immediately, even before the first JMdict refresh.
 // A general-language dictionary (or third-party site) does not prove game acceptance.
-const reportedMissingWords=['いとうき','いこうき'];
+const reportedMissingWords=['いこうき'];
 function indexDictionaryByLength(){
  wordsByLength=new Map();
  for(const word of words){
@@ -467,9 +467,10 @@ async function loadGeneralDictionary(){
 // The public dictionary and the user-confirmed supplement are independent.
 const extraKey='kotodaman-extra-words-v1';
 let extraWords=[];
+let publicVerifiedWords=[];
 try { const persisted=JSON.parse(localStorage.getItem(extraKey)||'[]'); if(Array.isArray(persisted))extraWords=parseWords(persisted); } catch(e) {}
 function rebuildDictionary(){
-  const primary=[...baseWords,...referenceVerifiedWords,...extraWords];
+  const primary=[...baseWords,...referenceVerifiedWords,...publicVerifiedWords,...extraWords];
   gameWordSet=new Set(primary);
   generalWordSet=new Set([...reportedMissingWords,...generalWords].filter(w=>!gameWordSet.has(w)));
   const showGeneral=el('includeGeneralWords').checked;
@@ -559,6 +560,17 @@ el('clearExtra').onclick=()=>{
  extraWords=[];saveExtra();rebuildDictionary();el('extraStatus').textContent='補完辞書を削除しました。';
 };
 rebuildDictionary();
+// Public, game-confirmed supplement; shared across Windows and iPhone via GitHub Pages.
+async function loadPublicVerifiedWords(){
+ try {
+  const resp=await fetch('./words-kotodaman-extra.txt?t='+Math.floor(Date.now()/3600000),{cache:'no-store'});
+  if(!resp.ok)throw Error('HTTP '+resp.status);
+  publicVerifiedWords=parseWords((await resp.text()).split(/\r?\n/).filter(x=>!x.trim().startsWith('#')));
+  rebuildDictionary();
+  console.info('Public verified Kotodaman words:',publicVerifiedWords.length);
+ } catch(err){console.warn('Verified game words could not be loaded:',err);}
+}
+loadPublicVerifiedWords();
 el('includeGeneralWords').addEventListener('change',rebuildDictionary);
 loadGeneralDictionary();
 
