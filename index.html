@@ -96,6 +96,11 @@
  .hand-letter{font-size:16px;padding:6px 9px;min-width:34px}
  .wrap>.footer{display:none}
 }
+
+/* iPhone Safari: disable double-tap zoom across the application without disabling pinch zoom. */
+@media (pointer:coarse){
+ html,body,main,main *{touch-action:manipulation;}
+}
 </style><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 <section class="panel" id="dictionaryPanel"><div class="head"><h2>① ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">旧版の非公式辞書を利用します。公開版では同梱データを初回自動読み込みし、以降は端末内に保存した辞書を復元します。友人の端末でも最初に辞書を読み込んでください。iPhoneで自動取得に失敗する場合は、Web上に公開したURLから開くか、JSON / CSV / TXTを「ファイルを選ぶ」で読み込んでください。</p><div class="row"><button id="fetchDict">公開辞書を読み込む</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">ファイルを選ぶ<input id="file" type="file" accept=".json,.csv,.txt" hidden></label><button id="clearDict" class="secondary">辞書を解除</button></div><p id="status" class="hint" aria-live="polite"></p><div class="footer">公開データ候補：<a href="https://unpkg.com/@kotodaman-unofficial/dictionary/dist/words.json" target="_blank" rel="noopener">非公式辞書 JSON</a> / <a href="https://gaccag.com/kotodaman/dictionary/" target="_blank" rel="noopener">参考の辞書サイト</a>。これらは最新の全語を保証するものではありません。</div></section>
