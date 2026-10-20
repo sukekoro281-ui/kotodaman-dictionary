@@ -174,13 +174,18 @@
  .deck-info-line .catalog-badge{font-size:10px}
  #deckPanel .head h2{font-size:15px}
 }
+ .general-dict-controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:#58677e;font-size:12px;margin:7px 0 3px}
+ .general-dict-controls label{display:inline-flex;gap:4px;align-items:center;cursor:pointer}
+ .general-dict-controls input{width:15px;height:15px;accent-color:#2563eb;margin:0}
+ .general-dict-controls a{color:#2563eb}
+ @media(max-width:600px){.general-dict-controls{gap:6px;font-size:11px}}
 </style><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>② デッキ登録・手札選択</h2><div class="row"><button class="secondary" id="saveDeck">全員に保存</button><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><button class="secondary" id="clearHand" type="button">手札解除</button></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select><button id="loadDeck" class="secondary">呼び出す・編集</button><button id="deleteDeck" class="danger" hidden>削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラの「＋手札」を押して最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
 <section class="panel" id="searchPanel"><h2>③ 盤面を入力して検索</h2>
 <p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
-<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="かい○○き" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand" checked> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="gimmick" selected>ギミック破壊向け（長い連続語優先）</option><option value="combo">予測コンボ数が多い順</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="board-preview" aria-label="検索する盤面の文字と空欄"><span class="board-preview-label">検索する盤面：</span><span id="boardPreviewLetters" style="display:flex;gap:3px;flex-wrap:wrap"></span></div><p class="hint"><span id="boardLength" aria-live="polite">5文字（空欄2マス）</span>・文字数は盤面から自動判定します。辞書にある候補はデッキ未登録でも表示します。デッキや手札で作れる言葉は上位に表示されます。「デッキで作れる語のみ」で絞り込み可能です。</p><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
+<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="かい○○き" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand" checked> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="gimmick" selected>ギミック破壊向け（長い連続語優先）</option><option value="combo">予測コンボ数が多い順</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="general-dict-controls"><label><input id="includeGeneralWords" type="checkbox" checked> 一般辞書の候補も表示</label><span id="generalWordsStatus">一般辞書：読み込み中</span><a href="dictionary-sources.html" target="_blank" rel="noopener">出典・注意事項</a></div><div class="board-preview" aria-label="検索する盤面の文字と空欄"><span class="board-preview-label">検索する盤面：</span><span id="boardPreviewLetters" style="display:flex;gap:3px;flex-wrap:wrap"></span></div><p class="hint"><span id="boardLength" aria-live="polite">5文字（空欄2マス）</span>・文字数は盤面から自動判定します。一般辞書のみの語はゲーム内で成立しない場合があります。辞書にある候補はデッキ未登録でも表示します。デッキや手札で作れる言葉は上位に表示されます。「デッキで作れる語のみ」で絞り込み可能です。</p><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
 <section class="panel" id="dictionaryPanel"><div class="head"><h2>① ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">旧版の非公式辞書を利用します。公開版では同梱データを初回自動読み込みし、以降は端末内に保存した辞書を復元します。友人の端末でも最初に辞書を読み込んでください。iPhoneで自動取得に失敗する場合は、Web上に公開したURLから開くか、JSON / CSV / TXTを「ファイルを選ぶ」で読み込んでください。</p><div class="row"><button id="fetchDict">公開辞書を読み込む</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">ファイルを選ぶ<input id="file" type="file" accept=".json,.csv,.txt" hidden></label><button id="clearDict" class="secondary">辞書を解除</button></div><p id="status" class="hint" aria-live="polite"></p><div class="footer">公開データ候補：<a href="https://unpkg.com/@kotodaman-unofficial/dictionary/dist/words.json" target="_blank" rel="noopener">非公式辞書 JSON</a> / <a href="https://gaccag.com/kotodaman/dictionary/" target="_blank" rel="noopener">参考の辞書サイト</a>。これらは最新の全語を保証するものではありません。</div></section>
 <section class="panel" id="supplementPanel"><div class="head"><h2>辞書の不足語を補完</h2><span class="tab" id="extraBadge">追加 0語</span></div>
 <p class="hint">ゲーム内で成立を確認した言葉を登録できます。追加語は検索候補・部分語・予測コンボに反映され、この端末に保存されます。他の端末や友人へはTXTを書き出して渡せます。</p>
@@ -274,7 +279,7 @@ function normalizeSlotData(x){
  return {name:String(x?.name||'').slice(0,100),chars:String(x?.chars||'').slice(0,120),
  attribute:String(x?.attribute||''),image:String(x?.image||''),url:String(x?.url||''),version:String(x?.version||'')};
 }
-const el=id=>document.getElementById(id), key='kotodaman-decks-v1';let words=[],baseWords=[],wordSet=new Set(),source='',slots=Array.from({length:12},()=>({name:'',chars:''}));
+const el=id=>document.getElementById(id), key='kotodaman-decks-v1';let words=[],baseWords=[],wordSet=new Set(),wordsByLength=new Map(),gameWordSet=new Set(),generalWordSet=new Set(),generalWords=[],source='',slots=Array.from({length:12},()=>({name:'',chars:''}));
 const handKey='kotodaman-active-hand-v1';let activeHand=[];
 function resetHand(){activeHand=[];renderHand();saveHand();search()}
 function saveHand(){try{sessionStorage.setItem(handKey,JSON.stringify(activeHand))}catch(e){}}
@@ -433,12 +438,44 @@ function parseWords(payload){let d=payload;if(!Array.isArray(d)){d=d.words||d.da
 // Confirmed missing words from the user's 2026-10-20 screenshot of the reference dictionary.
 // These are additive reference samples, not a claim of full parity with that site's live database.
 const referenceVerifiedWords=['とうえいが','とうえいき','とうかいぎ','とうけいじ'];
+// Two reported omissions are available immediately, even before the first JMdict refresh.
+// A general-language dictionary (or third-party site) does not prove game acceptance.
+const reportedMissingWords=['いとうき','いこうき'];
+function indexDictionaryByLength(){
+ wordsByLength=new Map();
+ for(const word of words){
+  const n=[...word].length;
+  if(!wordsByLength.has(n))wordsByLength.set(n,[]);
+  wordsByLength.get(n).push(word);
+ }
+}
+async function loadGeneralDictionary(){
+ const status=el('generalWordsStatus');
+ try{
+  const response=await fetch('./words-jmdict.txt',{cache:'no-store'});
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  generalWords=parseWords((await response.text()).split(/\r?\n/));
+  status.textContent=generalWords.length?`一般辞書 ${generalWords.length.toLocaleString()}語（成立未確認）`:'一般辞書：初回更新待ち';
+ }catch(error){
+  generalWords=[];
+  status.textContent='一般辞書の自動取得は準備中（参考語は表示）';
+  console.warn('JMdict vocabulary not available:',error);
+ }
+ rebuildDictionary();
+}
+
 // The public dictionary and the user-confirmed supplement are independent.
 const extraKey='kotodaman-extra-words-v1';
 let extraWords=[];
 try { const persisted=JSON.parse(localStorage.getItem(extraKey)||'[]'); if(Array.isArray(persisted))extraWords=parseWords(persisted); } catch(e) {}
 function rebuildDictionary(){
-  words=[...new Set([...baseWords,...referenceVerifiedWords,...extraWords])]; wordSet=new Set(words);
+  const primary=[...baseWords,...referenceVerifiedWords,...extraWords];
+  gameWordSet=new Set(primary);
+  generalWordSet=new Set([...reportedMissingWords,...generalWords].filter(w=>!gameWordSet.has(w)));
+  const showGeneral=el('includeGeneralWords').checked;
+  words=[...new Set([...primary,...(showGeneral?generalWordSet:[])])];
+  wordSet=new Set(words);
+  indexDictionaryByLength();
   el('dictBadge').textContent=baseWords.length?`${words.length.toLocaleString()}語`:'未読み込み';
   el('extraBadge').textContent=`追加 ${extraWords.length.toLocaleString()}語`;
   el('extraList').textContent=extraWords.length?extraWords.join('、'):'登録なし';
@@ -522,6 +559,8 @@ el('clearExtra').onclick=()=>{
  extraWords=[];saveExtra();rebuildDictionary();el('extraStatus').textContent='補完辞書を削除しました。';
 };
 rebuildDictionary();
+el('includeGeneralWords').addEventListener('change',rebuildDictionary);
+loadGeneralDictionary();
 
 el('file').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const t=await f.text();if(f.name.toLowerCase().endsWith('.json'))setWords(JSON.parse(t),f.name);else setWords(t.split(/\r?\n/).filter(Boolean).map(x=>x.split(/[,\t]/)[0]),f.name)}catch(err){el('status').textContent='読込エラー：'+err.message}};
 el('clearDict').onclick=async()=>{baseWords=[];source='';el('status').textContent='公開辞書を解除しました。補完辞書は維持しています。';rebuildDictionary();try{const db=await dictionaryDB();const tx=db.transaction('cache','readwrite');tx.objectStore('cache').delete('words');tx.oncomplete=()=>db.close()}catch(e){}};
@@ -643,8 +682,8 @@ function search(){
  const deck=options();
  const handDeck=deck.filter(card=>activeHand.includes(card.id));
  const matched=[];
- for(const word of words){
-  const w=[...word];if(w.length!==pattern.length)continue;
+ for(const word of (wordsByLength.get(pattern.length)||[])){
+  const w=[...word];
   let ok=true,need=[];
   for(let i=0;i<w.length;i++){
    if(pattern[i]==='○')need.push({position:i+1,char:w[i]});
@@ -653,7 +692,7 @@ function search(){
   if(!ok)continue;
   const assignment=deck.length?assign(need,deck):null;
   const handAssignment=handDeck.length?assign(need,handDeck):null;
-  matched.push({word,need,assignment,handAssignment,handPossible:!!handAssignment,buildable:!!assignment});
+  matched.push({word,need,assignment,handAssignment,handPossible:!!handAssignment,buildable:!!assignment,generalOnly:generalWordSet.has(word)});
  }
  const matchCount=matched.length;
  const buildableCount=matched.filter(x=>x.buildable).length;
@@ -662,7 +701,7 @@ function search(){
  const res=onlyDeck?matched.filter(x=>x.buildable):matched;
  root.className='';
  const stat=document.createElement('div');stat.className='stat';
- stat.textContent=`辞書一致 ${matchCount.toLocaleString()}語 / デッキで作れる ${buildableCount.toLocaleString()}語 / 手札で作れる ${handCount.toLocaleString()}語 / 表示 ${res.length.toLocaleString()}語 / 辞書 ${words.length.toLocaleString()}語 / 登録 ${deck.length}体（出典：${source||'追加語'}）`;
+ stat.textContent=`辞書一致 ${matchCount.toLocaleString()}語（一般辞書候補 ${matched.filter(x=>x.generalOnly).length.toLocaleString()}語） / デッキで作れる ${buildableCount.toLocaleString()}語 / 手札で作れる ${handCount.toLocaleString()}語 / 辞書 ${words.length.toLocaleString()}語 / 登録 ${deck.length}体`;
  root.append(stat);
  if(!deck.length&&!onlyDeck){
   const note=document.createElement('p');note.className='hint';
@@ -681,6 +720,8 @@ function search(){
  res.sort((a,b)=>{
   if(preferHand&&a.handPossible!==b.handPossible)return Number(b.handPossible)-Number(a.handPossible);
   if(a.buildable!==b.buildable)return Number(b.buildable)-Number(a.buildable);
+  // Put words from the game-oriented source ahead of general-only candidates within the same hand/deck tier.
+  if(a.generalOnly!==b.generalOnly)return Number(a.generalOnly)-Number(b.generalOnly);
   if(mode==='gimmick')return b.shape.length-a.shape.length||b.shape.edge-a.shape.edge||b.word.length-a.word.length||a.word.localeCompare(b.word,'ja');
   if(mode==='combo')return (b.combo?.count||0)-(a.combo?.count||0)||b.word.length-a.word.length||a.word.localeCompare(b.word,'ja');
   return a.word.localeCompare(b.word,'ja');
@@ -703,6 +744,7 @@ function search(){
   const comboBadge=document.createElement('span');comboBadge.className='combo-count';comboBadge.textContent=`予想コンボ数 ${combo.count}`;head.append(comboBadge);
   const mark=document.createElement('span');mark.className=obj.buildable?'hand-first-label':'chip';
   mark.textContent=obj.buildable?'デッキで作れる':'辞書候補';head.append(mark);
+  if(obj.generalOnly){const extra=document.createElement('span');extra.className='chip';extra.textContent='一般辞書・ゲーム内未確認';extra.title='一般日本語辞書または報告語による候補で、ゲーム内成立を保証しません';head.append(extra);}
   if(obj.handPossible&&activeHand.length){
    const hb=document.createElement('span');hb.className='hand-first-label';hb.textContent='手札で作れる';head.append(hb);
   }
