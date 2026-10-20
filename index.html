@@ -138,11 +138,46 @@
   }
   #searchPanel .board-mirror { display: none !important; }
 }
+
+/* Compact single-screen deck and hand selection */
+#deckPanel .notice{display:none}
+#deckPanel>.head{gap:8px}
+#deckPanel>.head>.row{gap:6px;align-items:center;flex-wrap:wrap}
+#deckPanel>.head>.row button{min-height:34px;padding:7px 9px;font-size:12px}
+#handCount{font-size:12px;white-space:nowrap;padding:6px 9px;background:#e7f0ff;color:#1d4ed8}
+.deck-info-line{display:flex;flex-wrap:wrap;align-items:center;gap:5px 12px;margin:4px 0 9px}
+.deck-info-line .hint,.deck-info-line .catalog-badge{margin:0;font-size:11px}
+.slot{padding:9px;min-width:0;position:relative;transition:background-color .12s,border-color .12s;cursor:pointer}
+.slot.is-in-hand{border-color:#2563eb;border-width:2px;padding:8px;background:#ecf4ff;box-shadow:0 0 0 1px #c7ddff}
+.slot-bar{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:6px;min-height:27px}
+.slot .slot-bar small{margin:0;white-space:nowrap;font-size:11px}
+.slot-hand-button{font-size:11px;white-space:nowrap;border-radius:8px;min-height:27px;padding:4px 8px;background:#e9eef7;color:#29466f;font-weight:750;line-height:1.2}
+.slot-hand-button.selected{background:#2563eb;color:white}
+.slot-hand-button:disabled{opacity:.45}
+.slot input{margin-bottom:5px;padding:8px;font-size:14px;cursor:text}
+.slot .selected{margin:3px 0;font-size:11px}
+.slot .selected-character{min-height:46px;margin:4px 0;gap:6px}
+.slot .selected-character-img,.slot .selected-character .attribute-icon{width:43px;height:43px;flex:none}
+.slot .selected-character-details{font-size:11px;line-height:1.4}
+#deckPanel>.row{margin-bottom:7px!important}
+@media(max-width:600px){
+ #deckPanel>.head>.row{flex-basis:100%;margin-top:2px}
+ #deckPanel .mobile-panel-body{margin-top:5px}
+ #deck{grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:6px}
+ .slot{padding:7px;border-radius:10px}
+ .slot.is-in-hand{padding:6px}
+ .slot input{padding:6px 5px;font-size:14px}
+ .slot .selected-character-img,.slot .selected-character .attribute-icon{width:36px;height:36px}
+ .slot .selected-character-details{font-size:10px}
+ .slot .selected-character{gap:4px;margin:2px 0;min-height:40px}
+ .slot-hand-button{min-height:26px;padding:4px 6px}
+ .deck-info-line .catalog-badge{font-size:10px}
+ #deckPanel .head h2{font-size:15px}
+}
 </style><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
-<section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>② 12体を登録・保存</h2><div class="row"><button class="secondary" id="saveDeck">全員に保存</button></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select><button id="loadDeck" class="secondary">呼び出す・編集</button><button id="deleteDeck" class="danger" hidden>削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="catalog-badge" id="catalogCount"></div><details style="margin:8px 0 16px"><summary style="cursor:pointer">キャラ情報を追加する（必要な場合のみ）</summary><p class="hint">下のボタンでGameWithの一覧を開き、ページを「名前を付けて保存」→「ウェブページ、HTMLのみ」で保存して、そのHTMLを読み込むと一覧から名前・文字を解析します。ページ構造によっては読み込めない場合があります。転載・配布せず、個人利用のデータとしてブラウザ内に保存します。</p><div class="row"><button class="secondary" id="openCatalog">キャラ一覧を開く</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px">保存したHTMLを取り込む<input id="catalogFile" type="file" accept=".html,.htm,.json,.csv,.txt" hidden></label><button class="danger" id="clearCatalog">追加データを消去</button></div><p id="catalogStatus" class="hint"></p></details><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><details style="margin:7px 0 12px"><summary>以前この端末に保存したデッキを共通一覧へ移す</summary><p class="hint">旧ローカル保存は削除せず、共通一覧へコピーします。全員に公開されます。</p><button type="button" id="migratePublicDecks" class="secondary">ローカルデッキを一括登録</button></details><div id="deck" class="grid"></div></section>
-<section class="panel" id="handPanel"><div class="head"><h2>いまの手札・最大4体で作れることば</h2><button class="secondary" id="clearHand" type="button">手札を解除</button></div><p class="hint">下の12体デッキから、現在手札にある4体をタップして選んでください。選んだ手札のキャラだけで盤面の空欄を埋められる言葉を、検索結果の先頭に表示します。</p><div class="row"><span class="tab" id="handCount">0 / 4体</span><span id="handStatus" class="hint">まず12体を登録してください。</span></div><div id="handChoices" class="hand-choice"></div><div id="handLetters" class="hand-letters" style="display:none" aria-hidden="true"><span class="hint">4体を選ぶと文字を表示します。</span></div></section>
+<section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>② デッキ登録・手札選択</h2><div class="row"><button class="secondary" id="saveDeck">全員に保存</button><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><button class="secondary" id="clearHand" type="button">手札解除</button></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select><button id="loadDeck" class="secondary">呼び出す・編集</button><button id="deleteDeck" class="danger" hidden>削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラの「＋手札」を押して最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
 <section class="panel" id="searchPanel"><h2>③ 盤面を入力して検索</h2>
 <p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
 <div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="かい○○き" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand" checked> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="gimmick" selected>ギミック破壊向け（長い連続語優先）</option><option value="combo">予測コンボ数が多い順</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="board-preview" aria-label="検索する盤面の文字と空欄"><span class="board-preview-label">検索する盤面：</span><span id="boardPreviewLetters" style="display:flex;gap:3px;flex-wrap:wrap"></span></div><p class="hint"><span id="boardLength" aria-live="polite">5文字（空欄2マス）</span>・文字数は盤面から自動判定します。辞書にある候補はデッキ未登録でも表示します。デッキや手札で作れる言葉は上位に表示されます。「デッキで作れる語のみ」で絞り込み可能です。</p><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
@@ -258,24 +293,32 @@ const handKey='kotodaman-active-hand-v1';let activeHand=[];
 function resetHand(){activeHand=[];renderHand();saveHand();search()}
 function saveHand(){try{sessionStorage.setItem(handKey,JSON.stringify(activeHand))}catch(e){}}
 function handLettersFor(slot){return [...new Set(String(slot.chars||'').split(/[,、，\/／\s]+/).flatMap(chunk=>chars(chunk)).filter(c=>/[ぁ-ゖ]/.test(c)))];}
+function toggleHandSlot(i){
+ const card=slots[i];
+ if(!card||( !card.name && !card.chars))return;
+ if(activeHand.includes(i))activeHand=activeHand.filter(id=>id!==i);
+ else if(activeHand.length<4)activeHand.push(i);
+ else return;
+ renderHand();saveHand();search();
+}
 function renderHand(){
  activeHand=activeHand.filter((id,pos)=>Number.isInteger(id)&&id>=0&&id<12&&activeHand.indexOf(id)===pos&&slots[id]&&(slots[id].name||slots[id].chars)).slice(0,4);
- const choices=el('handChoices'),root=el('handLetters');choices.replaceChildren();root.replaceChildren();
- el('handCount').textContent=activeHand.length+' / 4体';
- for(let i=0;i<12;i++){
-  const s=slots[i],button=document.createElement('button'),active=activeHand.includes(i);
-  button.type='button';button.className=active?'active':'';button.setAttribute('aria-pressed',String(active));
-  button.disabled=!(s.name||s.chars)||(!active&&activeHand.length>=4);
-  const id=document.createElement('span');id.className='hand-slot';id.textContent=(i+1)+'体目';
-  const title=document.createElement('span');title.textContent=(s.name||'未登録').slice(0,35);const visual=resolveSlotImage(s);if(visual)button.append(characterThumb(visual,'hand-character-img'));button.append(id,title);
-  button.addEventListener('click',()=>{if(active)activeHand=activeHand.filter(x=>x!==i);else if(activeHand.length<4)activeHand.push(i);renderHand();saveHand();search()});
-  choices.append(button);
+ const counter=el('handCount');if(counter)counter.textContent='手札 '+activeHand.length+'/4';
+ const stat=el('handStatus');if(stat){
+  stat.textContent=activeHand.length===4?'✓ 手札4体を選択中・作れる言葉を優先表示':
+   activeHand.length?'あと'+(4-activeHand.length)+'体選択できます。カードをタップして手札を切り替え':
+   'キャラのカードをタップ、または「＋手札」で最大4体を選択';
  }
- const counts=new Map();for(const i of activeHand){for(const letter of handLettersFor(slots[i]))counts.set(letter,(counts.get(letter)||0)+1)}
- const ordered=[...counts.entries()].sort((a,b)=>a[0].localeCompare(b[0],'ja'));
- for(const [letter,count] of ordered){const b=document.createElement('span');b.className='hand-letter';b.textContent=letter;if(count>1){const sm=document.createElement('small');sm.textContent=count+'体';b.append(sm)}root.append(b)}
- if(!ordered.length){let msg=document.createElement('span');msg.className='hint';msg.textContent='文字情報のあるキャラを選択すると、ここに表示されます。';root.append(msg)}
- el('handStatus').textContent=activeHand.length===4?'手札4体で検索結果を優先表示':activeHand.length?'あと'+(4-activeHand.length)+'体選べます（選択中の手札でも検索できます）':'デッキから手札を選ぶと、その手札で作れる言葉が先頭になります';
+ for(const btn of document.querySelectorAll('[data-hand-slot]')){
+  const i=Number(btn.dataset.handSlot),selected=activeHand.includes(i);
+  const valid=!!(slots[i]&&(slots[i].name||slots[i].chars));
+  btn.textContent=selected?'✓ 手札':'＋ 手札';
+  btn.classList.toggle('selected',selected);
+  btn.setAttribute('aria-pressed',String(selected));
+  btn.setAttribute('aria-label',(i+1)+'体目を'+(selected?'手札から外す':'手札に追加'));
+  btn.disabled=!valid||(!selected&&activeHand.length>=4);
+  btn.closest('.slot')?.classList.toggle('is-in-hand',selected);
+ }
 }
 
 const kana=s=>String(s||'').normalize('NFKC').trim().replace(/\s/g,'').replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96));
@@ -377,19 +420,26 @@ function setSelectedAttribute(node,name,attr,item){
  if(desktopImageMode())appendDesktopCharacterImagePicker(details,resolved||{name,attribute:attr},()=>setSelectedAttribute(node,name,attr,resolved));
  container.append(details);node.append(container);
 }
-function drawDeck(){el('deck').innerHTML='';slots.forEach((s,i)=>{const a=document.createElement('div');a.className='slot';const small=document.createElement('small');small.textContent=`${i+1}体目`;const n=document.createElement('input');n.placeholder='キャラ名・ローマ字で検索（例：setsuri）';n.value=s.name||'';n.setAttribute('autocomplete','off');const matches=document.createElement('div');matches.className='search-results';matches.hidden=true;const selected=document.createElement('div');selected.className='selected';const c=document.createElement('input');c.className='letters';c.placeholder='使用文字（候補選択で自動入力）';c.value=s.chars||'';
+function drawDeck(){el('deck').innerHTML='';slots.forEach((s,i)=>{const a=document.createElement('div');a.className='slot';const small=document.createElement('small');small.textContent=`${i+1}体目`;
+ const bar=document.createElement('div');bar.className='slot-bar';
+ const pick=document.createElement('button');pick.type='button';pick.className='slot-hand-button';
+ pick.dataset.handSlot=String(i);pick.addEventListener('click',()=>toggleHandSlot(i));
+ bar.append(small,pick);
+ const n=document.createElement('input');n.placeholder='キャラ名・ローマ字で検索（例：setsuri）';n.value=s.name||'';n.setAttribute('autocomplete','off');const matches=document.createElement('div');matches.className='search-results';matches.hidden=true;const selected=document.createElement('div');selected.className='selected';const c=document.createElement('input');c.className='letters';c.placeholder='使用文字（候補選択で自動入力）';c.value=s.chars||'';
 
-function showMatches(){let q=nameKey(n.value||'');matches.innerHTML='';if(!q){matches.hidden=true;return}let hits=catalog().filter(x=>charMatches(x,q)).slice(0,60);if(!hits.length){matches.hidden=true;selected.textContent='候補なし。キャラ一覧の追加を試してください。';return}for(let item of hits){let b=document.createElement('button');b.type='button';b.className='candidate';attachCandidateImage(b,item);let copy=document.createElement('span');copy.className='candidate-copy';let title=document.createElement('span');title.className='candidate-title';title.textContent=`${item.name}${item.version?' '+item.version:''}［${item.attribute}］`;let meta=document.createElement('span');meta.className='candidate-meta';meta.textContent=`${item.description&&item.description!==item.name?' '+item.description.split('・')[0]+' ／ ':''}使用文字：${item.letters.join('・')}`;copy.append(title,meta);b.append(copy);b.onclick=()=>{slots[i]=normalizeSlotData({name:item.name,chars:item.letters.join(','),attribute:item.attribute,image:item.image,url:item.url,version:item.version});n.value=item.name;c.value=slots[i].chars;setSelectedAttribute(selected,item.name,item.attribute,item);matches.hidden=true;persistDraft();renderHand();search();};matches.append(b)}matches.hidden=false}
-n.addEventListener('input',e=>{slots[i].name=e.target.value;slots[i].attribute='';slots[i].image='';slots[i].url='';slots[i].version='';selected.replaceChildren();persistDraft();renderHand();showMatches()});n.addEventListener('focus',showMatches);c.addEventListener('input',e=>{slots[i].chars=e.target.value;persistDraft();renderHand();search()});setSelectedAttribute(selected,s.name,s.attribute,resolveSlotImage(s));a.append(small,n,matches,selected,c);el('deck').append(a)});renderHand()}
+function showMatches(){let q=nameKey(n.value||'');matches.innerHTML='';if(!q){matches.hidden=true;return}let hits=catalog().filter(x=>charMatches(x,q)).slice(0,60);if(!hits.length){matches.hidden=true;selected.textContent='候補なし。名前や表記を確認してください。';return}for(let item of hits){let b=document.createElement('button');b.type='button';b.className='candidate';attachCandidateImage(b,item);let copy=document.createElement('span');copy.className='candidate-copy';let title=document.createElement('span');title.className='candidate-title';title.textContent=`${item.name}${item.version?' '+item.version:''}［${item.attribute}］`;let meta=document.createElement('span');meta.className='candidate-meta';meta.textContent=`${item.description&&item.description!==item.name?' '+item.description.split('・')[0]+' ／ ':''}使用文字：${item.letters.join('・')}`;copy.append(title,meta);b.append(copy);b.onclick=()=>{slots[i]=normalizeSlotData({name:item.name,chars:item.letters.join(','),attribute:item.attribute,image:item.image,url:item.url,version:item.version});n.value=item.name;c.value=slots[i].chars;setSelectedAttribute(selected,item.name,item.attribute,item);matches.hidden=true;persistDraft();renderHand();search();};matches.append(b)}matches.hidden=false}
+n.addEventListener('input',e=>{slots[i].name=e.target.value;slots[i].attribute='';slots[i].image='';slots[i].url='';slots[i].version='';selected.replaceChildren();persistDraft();renderHand();showMatches()});n.addEventListener('focus',showMatches);c.addEventListener('input',e=>{slots[i].chars=e.target.value;persistDraft();renderHand();search()});setSelectedAttribute(selected,s.name,s.attribute,resolveSlotImage(s));a.append(bar,n,matches,selected,c);
+ a.addEventListener('click',e=>{
+  if(e.target.closest('button,input,select,label,a,.search-results'))return;
+  toggleHandSlot(i);
+ });
+ el('deck').append(a)});renderHand()}
 function parseCatalogText(text){let results=[];const lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);for(let line of lines){let f=line.split(/\t|\s+\|\s+/).map(x=>x.trim()).filter(Boolean);if(f.length<3)continue;let attr=f.findIndex((x,i)=>i>0&&/^(火|水|木|光|闇|冥|天|虹)$/.test(x));if(attr<1)continue;let name=f[0].replace(/^\d+[.．]?\s*/,'').trim();let letter=f[attr+1]||'';let letters=[...letter.replace(/[\s,、・／/]/g,'')].filter(x=>/[ぁ-ゖ]/.test(x));if(name&&letters.length)results.push({name,attribute:f[attr],letters})}return results}
 function parseCatalogHTML(markup){let doc=new DOMParser().parseFromString(markup,'text/html');let rows=[...doc.querySelectorAll('tr')],results=[];for(let tr of rows){let cells=[...tr.querySelectorAll('td')];if(cells.length<3)continue;let name=cells[0].innerText||cells[0].textContent||'';name=name.trim().split('\n')[0].trim();let attribute=(cells[1].innerText||cells[1].textContent||'').trim();let letters=(cells[2].innerText||cells[2].textContent||'').match(/[ぁ-ゖ]/g)||[];if(name&&/^(火|水|木|光|闇|冥|天|虹)$/.test(attribute)&&letters.length)results.push({name,attribute,letters:[...new Set(letters)],reading:tr.getAttribute('data-reading')||''})}return results}
 function importCatalog(items){if(!items.length)throw Error('キャラ名・属性・使用文字を解析できませんでした。');let map=new Map(customCatalog.map(x=>[x.name+'|'+x.attribute+'|'+(x.version||''),x]));items.forEach(x=>map.set(x.name+'|'+x.attribute+'|'+(x.version||''),x));customCatalog=[...map.values()];localStorage.setItem(catKey,JSON.stringify(customCatalog));countCatalog();drawDeck();el('catalogStatus').textContent=`${items.length}件を解析。検索候補に反映しました。`}
-el('openCatalog').onclick=()=>window.open('https://gamewith.jp/kotodaman/article/show/99665','_blank','noopener');
-el('catalogFile').onchange=async e=>{try{let f=e.target.files?.[0];if(!f)return;let t=await f.text();let results;if(/\.html?$/i.test(f.name))results=parseCatalogHTML(t);else if(/\.json$/i.test(f.name)){let j=JSON.parse(t);results=(Array.isArray(j)?j:[]).map(x=>({name:x.name,attribute:x.attribute||'不明',version:x.version||'',reading:x.reading||x.yomi||'',image:x.image||'',url:x.url||'',letters:Array.isArray(x.letters)?x.letters:[...(x.letters||'')]})).filter(x=>x.name&&x.letters.length)}else results=parseCatalogText(t);importCatalog(results)}catch(err){el('catalogStatus').textContent='読込失敗：'+err.message}};
-
-el('clearCatalog').onclick=()=>{if(!confirm('追加したキャラ候補を削除しますか？（初期収録は残ります）'))return;customCatalog=[];localStorage.removeItem(catKey);countCatalog();drawDeck()};countCatalog();
+countCatalog();
 function listSaved(){let db={};try{db=JSON.parse(localStorage.getItem(key)||'{}')}catch{};el('savedDecks').innerHTML='<option value="">保存済みデッキを選択</option>';Object.keys(db).sort().forEach(name=>{let o=document.createElement('option');o.value=name;o.textContent=name;el('savedDecks').append(o)});return db}
-function save(){let name=el('deckName').value.trim()||'デッキ1',db=listSaved();db[name]=slots.map(x=>({...x}));localStorage.setItem(key,JSON.stringify(db));listSaved();el('savedDecks').value=name;el('status').textContent=`「${name}」を保存しました。`}
+function save(){let name=el('deckName').value.trim()||'デッキ1',db={};try{db=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){};db[name]=slots.map(x=>({...x}));localStorage.setItem(key,JSON.stringify(db));el('status').textContent=`「${name}」の端末内バックアップを保存しました。`}
 // Public deck handlers are registered by public-decks.js.
 window.kotodamanLocalDeckSave=save;
 function download(content,name,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
@@ -736,8 +786,7 @@ window.kotodamanCloudBridge={
 // The content is only visually collapsed in narrow view; desktop stays identical.
 (function setupMobileCompactPanels(){
  const sections=[
-  {panel:el('deckPanel'),label:'デッキを編集'},
-  {panel:el('handPanel'),label:'手札を選択'}
+  {panel:el('deckPanel'),label:'デッキ・手札を編集'}
  ];
  sections.forEach(({panel,label},index)=>{
   if(!panel)return;
@@ -790,7 +839,7 @@ window.kotodamanCloudBridge={
  const deckTitle=document.querySelector('#deckPanel > .head > h2');
  const searchTitle=document.querySelector('#searchPanel > h2');
  const update=()=>{
-  if(deckTitle)deckTitle.textContent=media.matches?'① 12体を登録・保存':'② 12体を登録・保存';
+  if(deckTitle)deckTitle.textContent=media.matches?'① デッキ・手札':'② デッキ・手札';
   if(searchTitle)searchTitle.textContent=media.matches?'② 盤面を入力して検索':'③ 盤面を入力して検索';
  };
  media.addEventListener?.('change',update);
