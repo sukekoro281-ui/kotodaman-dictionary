@@ -1,0 +1,41 @@
+name: Update JMdict vocabulary
+on:
+  schedule:
+    # Every Sunday 03:23 JST (Saturday 18:23 UTC). Weekly exceeds monthly update requirement.
+    - cron: '23 18 * * 6'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: dictionary-words-refresh
+  cancel-in-progress: false
+jobs:
+  refresh-vocabulary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read current JMdict and extract extra kana words
+        run: python scripts/update_dictionary_words.py
+      - name: Verify key omissions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          data=set(Path('words-jmdict.txt').read_text(encoding='utf-8').splitlines())
+          assert len(data)>10000, f'No general words: {len(data)}'
+          assert 'いこうき' in data or 'いこうき' in Path('words-local.txt').read_text(encoding='utf-8').splitlines()
+          print('JMdict extra words:',len(data))
+          PY
+      - name: Commit vocabulary changes only if new data exists
+        run: |
+          if git diff --quiet -- words-jmdict.txt; then
+            echo 'No vocabulary changes'; exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add words-jmdict.txt
+          git commit -m 'Update JMdict general-language vocabulary'
+          git push
