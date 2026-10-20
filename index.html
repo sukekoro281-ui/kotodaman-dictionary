@@ -731,11 +731,20 @@ function search(){
  if(mode==='combo')for(const x of res)x.combo=predictCombos(x.word);
  res.sort((a,b)=>{
   if(preferHand&&a.handPossible!==b.handPossible)return Number(b.handPossible)-Number(a.handPossible);
+  // In predicted-combo mode, sort by the displayed combo count BEFORE
+  // deck buildability or vocabulary source, which previously hid higher counts.
+  if(mode==='combo'){
+   const difference=(b.combo?.count||0)-(a.combo?.count||0);
+   if(difference)return difference;
+  }
   if(a.buildable!==b.buildable)return Number(b.buildable)-Number(a.buildable);
-  // Put words from the game-oriented source ahead of general-only candidates within the same hand/deck tier.
+  // The dictionary source only breaks ties after the selected sort metric.
+  if(mode==='combo'){
+   if(a.generalOnly!==b.generalOnly)return Number(a.generalOnly)-Number(b.generalOnly);
+   return b.word.length-a.word.length||a.word.localeCompare(b.word,'ja');
+  }
   if(a.generalOnly!==b.generalOnly)return Number(a.generalOnly)-Number(b.generalOnly);
   if(mode==='gimmick')return b.shape.length-a.shape.length||b.shape.edge-a.shape.edge||b.word.length-a.word.length||a.word.localeCompare(b.word,'ja');
-  if(mode==='combo')return (b.combo?.count||0)-(a.combo?.count||0)||b.word.length-a.word.length||a.word.localeCompare(b.word,'ja');
   return a.word.localeCompare(b.word,'ja');
  });
  if(preferHand){
