@@ -358,6 +358,320 @@ function listSaved(){let db={};try{db=JSON.parse(localStorage.getItem(key)||'{}'
 function save(){let name=el('deckName').value.trim()||'デッキ1',db=listSaved();db[name]=slots.map(x=>({...x}));localStorage.setItem(key,JSON.stringify(db));listSaved();el('savedDecks').value=name;el('status').textContent=`「${name}」を保存しました。`}
 // Public deck handlers are registered by public-decks.js.
 window.kotodamanLocalDeckSave=save;
+function download(content,name,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+function parseWords(payload){let d=payload;if(!Array.isArray(d)){d=d.words||d.data||d.rows||[]};let unique=new Map();for(let row of d){let word=typeof row==='string'?row:Array.isArray(row)?row[0]:row.word||row.kana||row.reading||row.yomi;word=kana(word);if(/^[ぁ-ゖー]+$/.test(word)&&word.length>=2&&word.length<=12)unique.set(word,true)}return [...unique.keys()]}
+// Confirmed missing words from the user's 2026-10-20 screenshot of the reference dictionary.
+// These are additive reference samples, not a claim of full parity with that site's live database.
+const referenceVerifiedWords=['とうえいが','とうえいき','とうかいぎ','とうけいじ'];
+// The public dictionary and the user-confirmed supplement are independent.
+const extraKey='kotodaman-extra-words-v1';
+let extraWords=[];
+try { const persisted=JSON.parse(localStorage.getItem(extraKey)||'[]'); if(Array.isArray(persisted))extraWords=parseWords(persisted); } catch(e) {}
+function rebuildDictionary(){
+  words=[...new Set([...baseWords,...referenceVerifiedWords,...extraWords])]; wordSet=new Set(words);
+  el('dictBadge').textContent=baseWords.length?`${words.length.toLocaleString()}語`:'未読み込み';
+  el('extraBadge').textContent=`追加 ${extraWords.length.toLocaleString()}語`;
+  el('extraList').textContent=extraWords.length?extraWords.join('、'):'登録なし';
+  search();
+}
+function saveExtra(){try{localStorage.setItem(extraKey,JSON.stringify(extraWords));return true}catch(e){el('extraStatus').textContent='この端末への保存に失敗しました。TXTを書き出してバックアップしてください。';return false}}
+function mergeExtra(incoming){
+  const normalized=parseWords(incoming), old=extraWords.length;
+  extraWords=[...new Set([...extraWords,...normalized])].sort((a,b)=>a.localeCompare(b,'ja'));
+  const persisted=saveExtra(); rebuildDictionary();
+  el('extraStatus').textContent=`${extraWords.length-old}語追加しました（補完辞書 合計${extraWords.length}語）。${persisted?'端末に保存済み。':'保存できませんでした。'}`;
+}
+function setWords(data,label,skipCache=false){
+  const out=parseWords(data);if(!out.length)throw Error('読み取れる「ひらがなの単語」がありません。形式を確認してください。');
+  baseWords=out;source=label;
+  el('status').textContent=`${label}：${out.length.toLocaleString()}語を読み込みました（追加辞書 ${extraWords.length}語）。`;
+  rebuildDictionary(); if(!skipCache)cacheDictionary(out).catch(()=>{});
+}
+// IndexedDB: store just the normalized words, so iPhone doesn't need to redownload on every visit.
+function dictionaryDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(new Error('IndexedDB非対応'));return}const req=indexedDB.open('kotodaman-words-cache',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('cache'))req.result.createObjectStore('cache')};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function cacheDictionary(out){const db=await dictionaryDB();return new Promise((resolve,reject)=>{const tx=db.transaction('cache','readwrite');tx.objectStore('cache').put(out,'words');tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}})}
+async function restoreDictionary(){try{const db=await dictionaryDB();const value=await new Promise((resolve,reject)=>{const tx=db.transaction('cache','readonly');const req=tx.objectStore('cache').get('words');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});db.close();if(value?.length&&!words.length)setWords(value,'この端末に保存した辞書',true)}catch(e){}}
+let fetchingDict=false;
+async function fetchDictionary(){
+ if(fetchingDict)return;
+ fetchingDict=true;
+ el('fetchDict').disabled=true;
+ el('status').textContent='辞書を読み込み中…';
+ // Prefer the site-bundled snapshot, so first-use works without cross-origin CDN access.
+ const urls=[
+  './words-local.txt',
+  'https://cdn.jsdelivr.net/npm/@kotodaman-unofficial/dictionary@0.1.1/dist/words.json',
+  'https://unpkg.com/@kotodaman-unofficial/dictionary@0.1.1/dist/words.json',
+  'https://raw.githubusercontent.com/kotodaman-unofficial/dictionary/master/dist/words.json'
+ ];
+ let errors=[];
+ try{
+  for(const url of urls){
+   try{
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),25000);
+    let r;
+    try{r=await fetch(url,{signal:controller.signal,cache:'no-cache'})}finally{clearTimeout(timer)}
+    if(!r.ok)throw Error('HTTP '+r.status);
+    const local=url.endsWith('.txt');
+    const payload=local?(await r.text()).split(/\r?\n/):await r.json();
+    setWords(payload,local?'同梱の非公式辞書（旧データ）':'非公式公開辞書');
+    return;
+   }catch(e){errors.push(url+': '+(e.message||e.name))}
+  }
+  el('status').textContent='辞書を取得できませんでした。「ファイルを選ぶ」から辞書JSON/TXTを読み込んでください。取得エラー: '+errors.join(' / ');
+ }finally{fetchingDict=false;el('fetchDict').disabled=false}
+}
+
+el('fetchDict').onclick=fetchDictionary;
+el('addExtra').onclick=()=>{
+ const raw=el('extraInput').value.trim(); if(!raw)return;
+ const parts=raw.split(/[、,，\s\n]+/).filter(Boolean);const parsed=parseWords(parts);
+ if(!parsed.length){el('extraStatus').textContent='2～12文字のひらがなで入力してください。';return}
+ mergeExtra(parsed);el('extraInput').value='';
+};
+el('extraInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el('addExtra').click()}});
+el('importExtra').onchange=async e=>{
+ try{
+  const f=e.target.files[0];if(!f)return;
+  const content=await f.text();let data;
+  if(f.name.toLowerCase().endsWith('.json'))data=JSON.parse(content);
+  else data=content.split(/\r?\n/).filter(Boolean).map(row=>row.split(/[,\t]/)[0]);
+  mergeExtra(data);
+ }catch(err){el('extraStatus').textContent='追加辞書の読み込みに失敗：'+err.message}
+ finally{e.target.value=''}
+};
+el('exportExtra').onclick=()=>{
+ if(!extraWords.length){el('extraStatus').textContent='書き出す追加語がありません。';return}
+ const data=new Blob([extraWords.join('\n')+'\n'],{type:'text/plain;charset=utf-8'});
+ const url=URL.createObjectURL(data),a=document.createElement('a');a.href=url;a.download='kotodaman_extra_words.txt';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ el('extraStatus').textContent='TXTを保存しました。友人側の「TXT / CSVを取り込む」で共有できます。';
+};
+el('clearExtra').onclick=()=>{
+ if(!extraWords.length)return;
+ if(!confirm('追加した単語をすべて削除しますか？ 公開辞書は消えません。'))return;
+ extraWords=[];saveExtra();rebuildDictionary();el('extraStatus').textContent='補完辞書を削除しました。';
+};
+rebuildDictionary();
+
+el('file').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const t=await f.text();if(f.name.toLowerCase().endsWith('.json'))setWords(JSON.parse(t),f.name);else setWords(t.split(/\r?\n/).filter(Boolean).map(x=>x.split(/[,\t]/)[0]),f.name)}catch(err){el('status').textContent='読込エラー：'+err.message}};
+el('clearDict').onclick=async()=>{baseWords=[];source='';el('status').textContent='公開辞書を解除しました。補完辞書は維持しています。';rebuildDictionary();try{const db=await dictionaryDB();const tx=db.transaction('cache','readwrite');tx.objectStore('cache').delete('words');tx.oncomplete=()=>db.close()}catch(e){}};
+restoreDictionary().then(()=>{if(!baseWords.length)fetchDictionary()});
+function options(){return slots.map((s,i)=>({id:i,name:s.name||`${i+1}体目`,letters:s.chars.split(/[,、，\/／\s]+/).flatMap(chars).filter(Boolean)})).filter(x=>x.letters.length)}
+function assign(needed,deck){const chosen=new Set(),answer=[];function backtrack(pos){if(pos>=needed.length)return true;const c=needed[pos].char;for(let card of deck){if(chosen.has(card.id)||!card.letters.includes(c))continue;chosen.add(card.id);answer.push({position:needed[pos].position,char:c,name:card.name});if(backtrack(pos+1))return true;chosen.delete(card.id);answer.pop()}return false}return backtrack(0)?answer:null}
+function predictCombos(word){
+  // Count distinct start/end segments present in the loaded dictionary. Overlap is allowed.
+  const letters=[...word], matches=[];
+  for(let i=0;i<letters.length;i++)for(let j=i+2;j<=letters.length;j++){
+    const segment=letters.slice(i,j).join('');
+    if(wordSet.has(segment))matches.push({word:segment,start:i+1,end:j});
+  }
+  return {count:matches.length,matches};
+}
+// Prefer long, contiguous dictionary words: for 4 chars prefer 1+3 / 3+1; for 5+ chars prefer 1+4 etc.
+// This is a sorting heuristic, NOT a prediction of shield/smash damage.
+function gimmickShape(word){
+  const a=[...word], n=a.length;
+  if(n<4)return {length:0,edge:0,split:'',segments:[]};
+  const minLength=n===4?3:4;
+  let candidates=[];
+  // Only proper substrings; the complete matching word does not count as a split.
+  for(let begin=0;begin<n;begin++)for(let end=begin+minLength;end<=n;end++){
+    if(begin===0&&end===n)continue;
+    const part=a.slice(begin,end).join('');
+    if(!wordSet.has(part))continue;
+    const prefix=a.slice(0,begin).join(''), suffix=a.slice(end).join('');
+    const side=Math.min(begin,n-end); // 0: at one edge, preferred
+    const isEdge=(begin===0||end===n)?1:0;
+    const split=begin===0?`${part}｜${suffix}`:end===n?`${prefix}｜${part}`:`${prefix}｜${part}｜${suffix}`;
+    candidates.push({length:end-begin,edge:isEdge,side,split,part});
+  }
+  candidates.sort((x,y)=>y.length-x.length||y.edge-x.edge||x.side-y.side||x.split.localeCompare(y.split,'ja'));
+  let best=candidates[0];
+  return best?{length:best.length,edge:best.edge,split:best.split,segments:candidates}:{length:0,edge:0,split:'',segments:[]};
+}
+// Keep spaces and blank-symbol variants as cells. Unlike generic kana(), this must
+// not .trim() or remove whitespace: a trailing space is a meaningful empty cell.
+function normalizeBoardBlanks(value){
+ return String(value||'').replace(/[\u0009-\u000d\u0020\u00a0\u1680\u2000-\u200b\u2028\u2029\u202f\u205f\u3000\ufeff]/g,'○')
+  .replace(/[〇◯◦◌⚪⭕?？＿_・＊*]/g,'○').replace(/[\uFE0E\uFE0F]/g,'');
+}
+function boardPattern(value){
+ return [...normalizeBoardBlanks(String(value||'').normalize('NFKC'))
+   .replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96))];
+}
+function updateBoardPresentation(){
+ const mirror=el('boardMirror'),text=normalizeBoardBlanks(boardField.value);
+ mirror.replaceChildren();
+ for(const ch of text){
+  const node=document.createElement('span');node.textContent=ch;
+  if(ch==='○')node.className='blank-glyph';
+  mirror.append(node);
+ }
+ const preview=el('boardPreviewLetters');
+ preview.replaceChildren();
+ for(const ch of text){
+  const node=document.createElement('span');
+  node.className='letter'+(ch==='○'?' blank-glyph':'');
+  node.textContent=ch;
+  preview.append(node);
+ }
+ el('boardLength').textContent=`${[...text].length}文字（空欄${[...text].filter(c=>c==='○').length}マス）`;
+}
+let searchTimer=0;
+let mobileResultLimit=8;
+function scheduleSearch(delay=180){
+ mobileResultLimit=8;
+ clearTimeout(searchTimer);
+ searchTimer=setTimeout(()=>search(),delay);
+}
+function commitBoardInput(){
+ if(boardComposing){updateBoardPresentation();return}
+ const start=boardField.selectionStart,end=boardField.selectionEnd;
+ const before=boardField.value;
+ const after=normalizeBoardBlanks(before);
+ if(after!==before){
+  const pos1=start==null?after.length:normalizeBoardBlanks(before.slice(0,start)).length;
+  const pos2=end==null?pos1:normalizeBoardBlanks(before.slice(0,end)).length;
+  boardField.value=after;
+  try{boardField.setSelectionRange(pos1,pos2)}catch(e){}
+ }
+ updateBoardPresentation();
+}
+function insertBoardBlank(){
+ if(boardComposing)return;
+ const start=boardField.selectionStart??boardField.value.length;
+ const end=boardField.selectionEnd??start;
+ if(boardField.value.length-(end-start)>=Number(boardField.maxLength||12))return;
+ boardField.setRangeText('○',start,end,'end');
+ boardField.focus({preventScroll:true});
+ commitBoardInput();
+}
+boardField.addEventListener('beforeinput',e=>{
+ // iPhone Japanese IME can use space while converting kana; do not interrupt composition.
+ if(boardComposing||e.isComposing)return;
+ if(e.inputType==='insertText'&&e.data&&/^[ 　\u00a0]+$/.test(e.data)&&e.cancelable){
+  e.preventDefault();
+  const begin=boardField.selectionStart??boardField.value.length;
+  const end=boardField.selectionEnd??begin;
+  boardField.setRangeText('○'.repeat([...e.data].length),begin,end,'end');
+  commitBoardInput();
+ }
+});
+boardField.addEventListener('compositionstart',()=>{boardComposing=true});
+boardField.addEventListener('compositionend',()=>{boardComposing=false;commitBoardInput();scheduleSearch(220)});
+boardField.addEventListener('input',()=>{commitBoardInput();if(!boardComposing)scheduleSearch()});
+boardField.addEventListener('change',()=>{commitBoardInput();scheduleSearch(0)});
+el('insertBlank').addEventListener('click',()=>{insertBoardBlank();scheduleSearch(0)});
+updateBoardPresentation();
+function search(){
+ const root=el('result');root.replaceChildren();
+ commitBoardInput();
+ if(!baseWords.length&&!extraWords.length){root.className='notice';root.textContent='辞書を読み込み中です。読み込めない場合は「公開辞書を読み込む」を押してください。';return}
+ const pattern=boardPattern(boardField.value);
+ if(!pattern.length){root.className='notice';root.textContent='盤面を入力してください。';return}
+ if(!pattern.every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c))){root.className='notice';root.textContent='ひらがなと「○」で盤面を入力してください。';return}
+ const deck=options();
+ const handDeck=deck.filter(card=>activeHand.includes(card.id));
+ const matched=[];
+ for(const word of words){
+  const w=[...word];if(w.length!==pattern.length)continue;
+  let ok=true,need=[];
+  for(let i=0;i<w.length;i++){
+   if(pattern[i]==='○')need.push({position:i+1,char:w[i]});
+   else if(pattern[i]!==w[i]){ok=false;break}
+  }
+  if(!ok)continue;
+  const assignment=deck.length?assign(need,deck):null;
+  const handAssignment=handDeck.length?assign(need,handDeck):null;
+  matched.push({word,need,assignment,handAssignment,handPossible:!!handAssignment,buildable:!!assignment});
+ }
+ const matchCount=matched.length;
+ const buildableCount=matched.filter(x=>x.buildable).length;
+ const handCount=matched.filter(x=>x.handPossible).length;
+ const onlyDeck=el('onlyDeck').checked;
+ const res=onlyDeck?matched.filter(x=>x.buildable):matched;
+ root.className='';
+ const stat=document.createElement('div');stat.className='stat';
+ stat.textContent=`辞書一致 ${matchCount.toLocaleString()}語 / デッキで作れる ${buildableCount.toLocaleString()}語 / 手札で作れる ${handCount.toLocaleString()}語 / 表示 ${res.length.toLocaleString()}語 / 辞書 ${words.length.toLocaleString()}語 / 登録 ${deck.length}体（出典：${source||'追加語'}）`;
+ root.append(stat);
+ if(!deck.length&&!onlyDeck){
+  const note=document.createElement('p');note.className='hint';
+  note.textContent='デッキ未登録のため、辞書に存在する全候補を表示します。登録すると作れる言葉を先頭に並べます。';
+  root.append(note);
+ }
+ if(!res.length){
+  const note=document.createElement('div');note.className='empty';
+  note.textContent=onlyDeck?(deck.length?'辞書には候補があっても、現在のデッキでは空欄を埋められません。絞り込みを解除すると候補を確認できます。':'デッキが未登録です。絞り込みを解除すると辞書の候補を確認できます。'):'この盤面に一致する単語は現在の辞書にありません。外部辞書と収録語が異なる場合があります。';
+  root.append(note);return;
+ }
+ const mode=el('sortMode').value;
+ const preferHand=el('preferHand').checked && activeHand.length>0;
+ if(mode==='gimmick')for(const x of res)x.shape=gimmickShape(x.word);
+ if(mode==='combo')for(const x of res)x.combo=predictCombos(x.word);
+ res.sort((a,b)=>{
+  if(preferHand&&a.handPossible!==b.handPossible)return Number(b.handPossible)-Number(a.handPossible);
+  if(a.buildable!==b.buildable)return Number(b.buildable)-Number(a.buildable);
+  if(mode==='gimmick')return b.shape.length-a.shape.length||b.shape.edge-a.shape.edge||b.word.length-a.word.length||a.word.localeCompare(b.word,'ja');
+  if(mode==='combo')return (b.combo?.count||0)-(a.combo?.count||0)||b.word.length-a.word.length||a.word.localeCompare(b.word,'ja');
+  return a.word.localeCompare(b.word,'ja');
+ });
+ if(preferHand){
+  const info=document.createElement('div');info.className='hand-priority-note';
+  info.textContent=handCount?`手札の${activeHand.length}体で作れる ${handCount}語を最優先表示しています。`:`手札${activeHand.length}体で作れる候補はありません。辞書の候補とデッキで作れる候補は下に表示します。`;
+  root.append(info);
+ }
+ const mobileResults=window.matchMedia('(max-width:600px)').matches;
+ const displayLimit=mobileResults?Math.min(300,mobileResultLimit):300;
+ for(const obj of res.slice(0,displayLimit)){
+  const shape=obj.shape||gimmickShape(obj.word);
+  const combo=obj.combo||predictCombos(obj.word);
+  const row=document.createElement('div');row.className='word';
+  if(obj.handPossible&&activeHand.length)row.classList.add('hand-first');
+  const left=document.createElement('div'),head=document.createElement('div');head.className='result-main';
+  const title=document.createElement('strong');title.textContent=obj.word;head.append(title);
+  const lenBadge=document.createElement('span');lenBadge.className='length-badge';lenBadge.textContent=`${[...obj.word].length}文字`;head.append(lenBadge);
+  const comboBadge=document.createElement('span');comboBadge.className='combo-count';comboBadge.textContent=`予想コンボ数 ${combo.count}`;head.append(comboBadge);
+  const mark=document.createElement('span');mark.className=obj.buildable?'hand-first-label':'chip';
+  mark.textContent=obj.buildable?'デッキで作れる':'辞書候補';head.append(mark);
+  if(obj.handPossible&&activeHand.length){
+   const hb=document.createElement('span');hb.className='hand-first-label';hb.textContent='手札で作れる';head.append(hb);
+  }
+  if(shape.length>=(obj.word.length===4?3:4)){
+   const gimmick=document.createElement('span');gimmick.className='gimmick-badge';
+   gimmick.textContent=`長い連続語 ${shape.length}文字`;head.append(gimmick);
+  }
+  left.append(head);
+  if(shape.split){const split=document.createElement('div');split.className='gimmick-split';split.textContent=`まとまり：${shape.split}`;left.append(split)}
+  if(combo.matches?.length){
+   const comboTerms=document.createElement('div');comboTerms.className='combo-terms';
+   const uniq=[];const seen=new Set();
+   for(const m of combo.matches){const key=`${m.word}@${m.start}-${m.end}`;if(seen.has(key))continue;seen.add(key);uniq.push(`${m.word}(${m.start}-${m.end})`);if(uniq.length>=8)break}
+   comboTerms.textContent='予想コンボ候補：'+uniq.join(' / ');
+   left.append(comboTerms);
+  }
+  const chips=document.createElement('div');chips.className='chips';
+  if(obj.assignment){
+   for(const a of (obj.handPossible?obj.handAssignment:obj.assignment)){
+    const c=document.createElement('span');c.className='chip';c.textContent=`${a.position}文字目「${a.char}」← ${a.name}`;chips.append(c);
+   }
+  }else if(obj.need.length){
+   const c=document.createElement('span');c.className='chip';
+   c.textContent='必要な文字：'+obj.need.map(x=>`${x.position}番目「${x.char}」`).join('、');chips.append(c);
+  }else{
+   const c=document.createElement('span');c.className='chip';c.textContent='追加文字なし';chips.append(c);
+  }
+  row.append(left,chips);root.append(row);
+ }
+ if(mobileResults&&res.length>displayLimit){
+  const more=document.createElement('button');more.type='button';more.className='more-mobile-results';
+  const next=Math.min(300,res.length,displayLimit+8)-displayLimit;
+  more.textContent=`さらに${next}件表示（現在${displayLimit} / ${res.length}件）`;
+  more.addEventListener('click',()=>{mobileResultLimit=Math.min(300,mobileResultLimit+8);search()});
+  root.append(more);
+ }
+ if(res.length>300){const p=document.createElement('p');p.className='hint';p.textContent=mobileResults?'候補が多いため、最大300件まで表示できます。':'結果が多いため、上位300語を表示しています。';root.append(p)}
+}
+el('onlyDeck').onchange=()=>search();el('preferHand').onchange=()=>search();el('sortMode').onchange=()=>search();el('search').onclick=()=>search();el('reset').onclick=()=>{boardField.value='かい○○き';commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();search()}});
 // Draft persistence is device-local, independent of named decks.
 const draftKey='kotodaman-dictionary-draft-v1';
 function persistDraft(){try{localStorage.setItem(draftKey,JSON.stringify({name:el('deckName').value,slots}));el('draftStatus').textContent='✓ この端末に入力内容を自動保存しました'}catch(e){el('draftStatus').textContent='端末に自動保存できません。JSON書き出しでバックアップしてください。'}}
