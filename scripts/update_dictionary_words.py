@@ -19,7 +19,7 @@ import time
 import urllib.request
 import xml.etree.ElementTree as ET
 
-DEFAULT_SOURCE = 'https://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz'
+DEFAULT_SOURCE = 'https://www.edrdg.org/pub/Nihongo/JMdict_e.gz'
 KANA = re.compile(r'^[ぁ-ゖー]{2,12}$')
 
 
