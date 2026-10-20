@@ -15,6 +15,18 @@
 .hand-character-img{width:48px;height:48px;object-fit:contain;border-radius:8px;background:#eef3fb;}
 .hand-choice button .attribute-icon{width:48px;height:48px;font-size:19px;}
 .candidate .attribute-icon{height:57px;width:65px;}
+
+/* iOS-safe single-line input: the native input keeps its caret and IME;
+   a noninteractive, exactly aligned text layer colors blank cells blue. */
+.board-shell{position:relative;flex:1 1 290px;max-width:340px;min-width:210px;isolation:isolate}
+.board-shell .board{display:block;max-width:none;position:relative;margin:0;z-index:1;color:transparent;-webkit-text-fill-color:transparent;caret-color:#1d4ed8;background:transparent;font-variant-ligatures:none}
+.board-shell .board::selection{background:#b9d7ff;-webkit-text-fill-color:transparent}
+.board-shell .board::placeholder{color:#8090a7;-webkit-text-fill-color:#8090a7}
+.board-mirror{position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:pre;padding:11px 12px;border:1px solid transparent;border-radius:10px;font-family:inherit;font-weight:700;font-size:25px;line-height:normal;letter-spacing:.10em;color:#1c273a;font-variant-ligatures:none}
+.board-mirror .blank-glyph{color:#2563eb;background:#e6f0ff;border-radius:4px}
+.blank-button{background:#dbeafe;color:#1d4ed8;padding:11px 12px;white-space:nowrap}
+.blank-button:hover{background:#c5dcff}
+@media(max-width:600px){.board-mirror{font-size:22px}.board-shell{flex:1 1 100%;max-width:100%}.blank-button{flex:0 0 auto}}
 </style><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 <section class="panel"><div class="head"><h2>① ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">旧版の非公式辞書を利用します。公開版では同梱データを初回自動読み込みし、以降は端末内に保存した辞書を復元します。友人の端末でも最初に辞書を読み込んでください。iPhoneで自動取得に失敗する場合は、Web上に公開したURLから開くか、JSON / CSV / TXTを「ファイルを選ぶ」で読み込んでください。</p><div class="row"><button id="fetchDict">公開辞書を読み込む</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">ファイルを選ぶ<input id="file" type="file" accept=".json,.csv,.txt" hidden></label><button id="clearDict" class="secondary">辞書を解除</button></div><p id="status" class="hint" aria-live="polite"></p><div class="footer">公開データ候補：<a href="https://unpkg.com/@kotodaman-unofficial/dictionary/dist/words.json" target="_blank" rel="noopener">非公式辞書 JSON</a> / <a href="https://gaccag.com/kotodaman/dictionary/" target="_blank" rel="noopener">参考の辞書サイト</a>。これらは最新の全語を保証するものではありません。</div></section>
@@ -26,8 +38,11 @@
 </section>
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">友人との共有：同じURLでそれぞれ利用できます。デッキを渡す場合は「共有リンクを作成」。自動同期ではありません。</div><div class="head"><h2>② 12体を登録・保存</h2><div class="row"><button class="secondary" id="saveDeck">デッキ保存</button><button class="secondary" id="shareLink">共有リンクを作成</button><button class="secondary" id="exportDeck">JSON書き出し</button><label style="background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650;cursor:pointer">復元<input id="importDeck" type="file" accept=".json" hidden></label></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">保存済みデッキを選択</option></select><button id="loadDeck" class="secondary">呼び出す</button><button id="deleteDeck" class="danger">削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="catalog-badge" id="catalogCount"></div><details style="margin:8px 0 16px"><summary style="cursor:pointer">キャラ情報を追加する（必要な場合のみ）</summary><p class="hint">下のボタンでGameWithの一覧を開き、ページを「名前を付けて保存」→「ウェブページ、HTMLのみ」で保存して、そのHTMLを読み込むと一覧から名前・文字を解析します。ページ構造によっては読み込めない場合があります。転載・配布せず、個人利用のデータとしてブラウザ内に保存します。</p><div class="row"><button class="secondary" id="openCatalog">キャラ一覧を開く</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px">保存したHTMLを取り込む<input id="catalogFile" type="file" accept=".html,.htm,.json,.csv,.txt" hidden></label><button class="danger" id="clearCatalog">追加データを消去</button></div><p id="catalogStatus" class="hint"></p></details><div id="deck" class="grid"></div></section>
 <section class="panel" id="handPanel"><div class="head"><h2>いまの手札・最大4体で作れることば</h2><button class="secondary" id="clearHand" type="button">手札を解除</button></div><p class="hint">下の12体デッキから、現在手札にある4体をタップして選んでください。選んだ手札のキャラだけで盤面の空欄を埋められる言葉を、検索結果の先頭に表示します。</p><div class="row"><span class="tab" id="handCount">0 / 4体</span><span id="handStatus" class="hint">まず12体を登録してください。</span></div><div id="handChoices" class="hand-choice"></div><div id="handLetters" class="hand-letters" style="display:none" aria-hidden="true"><span class="hint">4体を選ぶと文字を表示します。</span></div></section>
-<section class="panel"><h2>③ 盤面を入力して検索</h2><div class="row"><input id="board" class="board" value="かい○○き" maxlength="12" aria-label="盤面"><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand" checked> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="gimmick" selected>ギミック破壊向け（長い連続語優先）</option><option value="combo">予測コンボ数が多い順</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><p class="hint">辞書にある候補はデッキ未登録でも表示します。デッキや手札で作れる言葉は上位に表示されます。「デッキで作れる語のみ」で絞り込み可能です。</p><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
+<section class="panel"><h2>③ 盤面を入力して検索</h2>
+<p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
+<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="かい○○き" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand" checked> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="gimmick" selected>ギミック破壊向け（長い連続語優先）</option><option value="combo">予測コンボ数が多い順</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><p class="hint"><span id="boardLength" aria-live="polite">5文字（空欄2マス）</span>・文字数は盤面から自動判定します。辞書にある候補はデッキ未登録でも表示します。デッキや手札で作れる言葉は上位に表示されます。「デッキで作れる語のみ」で絞り込み可能です。</p><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
 <div class="footer">登録デッキはこのブラウザ内に保存されます。辞書は端末内へのキャッシュを試みます（Safariのストレージ削除などで失われる場合があります）。このHTMLは単体で動きます。キャラの属性は色分け表示します。キャラ画像は登録済みの外部画像URLから表示します。画像が読み込めない場合は属性表示に切り替わります。スクショからのキャラ自動認識は未実装です。</div></main><script>
+const boardField=document.getElementById('board');let boardComposing=false;
 const localImages=new Map();let imageUrls=[];
 function imageKey(path){try{return decodeURIComponent(String(path||'').split('?')[0].split('/').pop()).toLowerCase()}catch(e){return String(path||'').split('/').pop().toLowerCase()}}
 function preferredImage(item){const k=imageKey(item.image);return localImages.get(k)||item.image||''}
@@ -259,11 +274,70 @@ function gimmickShape(word){
   let best=candidates[0];
   return best?{length:best.length,edge:best.edge,split:best.split,segments:candidates}:{length:0,edge:0,split:'',segments:[]};
 }
+// Keep spaces and blank-symbol variants as cells. Unlike generic kana(), this must
+// not .trim() or remove whitespace: a trailing space is a meaningful empty cell.
+function normalizeBoardBlanks(value){
+ return String(value||'').replace(/[\u0009-\u000d\u0020\u00a0\u1680\u2000-\u200b\u2028\u2029\u202f\u205f\u3000\ufeff]/g,'○')
+  .replace(/[〇◯◦◌⚪⭕?？＿_・＊*]/g,'○').replace(/[\uFE0E\uFE0F]/g,'');
+}
+function boardPattern(value){
+ return [...normalizeBoardBlanks(String(value||'').normalize('NFKC'))
+   .replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96))];
+}
+function updateBoardPresentation(){
+ const mirror=el('boardMirror'),text=normalizeBoardBlanks(boardField.value);
+ mirror.replaceChildren();
+ for(const ch of text){
+  const node=document.createElement('span');node.textContent=ch;
+  if(ch==='○')node.className='blank-glyph';
+  mirror.append(node);
+ }
+ el('boardLength').textContent=`${[...text].length}文字（空欄${[...text].filter(c=>c==='○').length}マス）`;
+}
+function commitBoardInput(){
+ if(boardComposing){updateBoardPresentation();return}
+ const start=boardField.selectionStart,end=boardField.selectionEnd;
+ const before=boardField.value;
+ const after=normalizeBoardBlanks(before);
+ if(after!==before){
+  const pos1=start==null?after.length:normalizeBoardBlanks(before.slice(0,start)).length;
+  const pos2=end==null?pos1:normalizeBoardBlanks(before.slice(0,end)).length;
+  boardField.value=after;
+  try{boardField.setSelectionRange(pos1,pos2)}catch(e){}
+ }
+ updateBoardPresentation();
+}
+function insertBoardBlank(){
+ if(boardComposing)return;
+ const start=boardField.selectionStart??boardField.value.length;
+ const end=boardField.selectionEnd??start;
+ if(boardField.value.length-(end-start)>=Number(boardField.maxLength||12))return;
+ boardField.setRangeText('○',start,end,'end');
+ boardField.focus({preventScroll:true});
+ commitBoardInput();
+}
+boardField.addEventListener('beforeinput',e=>{
+ // iPhone Japanese IME can use space while converting kana; do not interrupt composition.
+ if(boardComposing||e.isComposing)return;
+ if(e.inputType==='insertText'&&e.data&&/^[ 　\u00a0]+$/.test(e.data)&&e.cancelable){
+  e.preventDefault();
+  const begin=boardField.selectionStart??boardField.value.length;
+  const end=boardField.selectionEnd??begin;
+  boardField.setRangeText('○'.repeat([...e.data].length),begin,end,'end');
+  commitBoardInput();
+ }
+});
+boardField.addEventListener('compositionstart',()=>{boardComposing=true});
+boardField.addEventListener('compositionend',()=>{boardComposing=false;commitBoardInput()});
+boardField.addEventListener('input',commitBoardInput);
+boardField.addEventListener('change',commitBoardInput);
+el('insertBlank').addEventListener('click',insertBoardBlank);
+updateBoardPresentation();
 function search(){
  const root=el('result');root.replaceChildren();
+ commitBoardInput();
  if(!baseWords.length&&!extraWords.length){root.className='notice';root.textContent='辞書を読み込み中です。読み込めない場合は「公開辞書を読み込む」を押してください。';return}
- const raw=kana(el('board').value.replace(/[ 　\t]/g,'○')).replace(/[?？＿_・＊*〇◯]/g,'○');
- const pattern=[...raw];
+ const pattern=boardPattern(boardField.value);
  if(!pattern.length){root.className='notice';root.textContent='盤面を入力してください。';return}
  if(!pattern.every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c))){root.className='notice';root.textContent='ひらがなと「○」で盤面を入力してください。';return}
  const deck=options();
@@ -349,7 +423,7 @@ function search(){
  }
  if(res.length>300){const p=document.createElement('p');p.className='hint';p.textContent='結果が多いため、上位300語を表示しています。';root.append(p)}
 }
-el('onlyDeck').onchange=search;el('preferHand').onchange=search;el('sortMode').onchange=search;el('search').onclick=search;el('reset').onclick=()=>{el('board').value='かい○○き';search()};el('board').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+el('onlyDeck').onchange=search;el('preferHand').onchange=search;el('sortMode').onchange=search;el('search').onclick=search;el('reset').onclick=()=>{boardField.value='かい○○き';commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();commitBoardInput();search()}});
 // Draft persistence is device-local, independent of named decks.
 const draftKey='kotodaman-dictionary-draft-v1';
 function persistDraft(){try{localStorage.setItem(draftKey,JSON.stringify({name:el('deckName').value,slots}));el('draftStatus').textContent='✓ この端末に入力内容を自動保存しました'}catch(e){el('draftStatus').textContent='端末に自動保存できません。JSON書き出しでバックアップしてください。'}}
