@@ -1,0 +1,11 @@
+{
+  "name": "コトダマン辞書｜デッキことば検索",
+  "short_name": "コトダマン辞書",
+  "description": "12体デッキの文字でことばを検索するツール",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#2563eb",
+  "icons": [{"src":"icon.svg", "sizes":"any", "type":"image/svg+xml", "purpose":"any maskable"}]
+}
