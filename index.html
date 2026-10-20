@@ -33,13 +33,20 @@
 .mobile-panel-body{display:contents}
 .more-mobile-results{display:none}
 @media(max-width:600px){
+ /* Mobile: keep dictionary initialization active, hide setup and word editing UI. */
+ #dictionaryPanel,#supplementPanel{display:none!important}
  .wrap{padding:9px 8px 22px}
  h1{font-size:19px;line-height:1.35;margin-bottom:2px}
  h2{font-size:15px;margin:0}
  .sub{font-size:11px;line-height:1.35}
  .panel{padding:11px 11px 12px;margin:8px 0;border-radius:12px}
  .panel .head{gap:7px}
- .mobile-panel-toggle{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:12px;min-height:38px;padding:7px 11px;background:#eaf1ff;color:#1d4ed8;border-radius:8px}
+ /* Same exact top-right position whether panel is opened or collapsed. */
+ .mobile-panel>.head{position:relative;min-height:38px;padding-right:76px;align-items:flex-start}
+ .mobile-panel>.head>h2{min-height:38px;display:flex;align-items:center}
+ .mobile-panel-toggle{display:inline-flex;position:absolute;top:0;right:0;width:65px;align-items:center;justify-content:center;font-size:12px;min-height:38px;padding:7px 8px;background:#eaf1ff;color:#1d4ed8;border-radius:8px;z-index:1}
+ #deckPanel>.head>.row{flex:1 0 100%;margin-top:3px}
+ #handPanel>.head>#clearHand{margin-top:3px}
  .mobile-panel-body{display:block}
  .mobile-collapsed>.mobile-panel-body{display:none}
  .mobile-collapsed>.head{margin:0}
@@ -91,7 +98,7 @@
 }
 </style><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
-<section class="panel"><div class="head"><h2>① ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">旧版の非公式辞書を利用します。公開版では同梱データを初回自動読み込みし、以降は端末内に保存した辞書を復元します。友人の端末でも最初に辞書を読み込んでください。iPhoneで自動取得に失敗する場合は、Web上に公開したURLから開くか、JSON / CSV / TXTを「ファイルを選ぶ」で読み込んでください。</p><div class="row"><button id="fetchDict">公開辞書を読み込む</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">ファイルを選ぶ<input id="file" type="file" accept=".json,.csv,.txt" hidden></label><button id="clearDict" class="secondary">辞書を解除</button></div><p id="status" class="hint" aria-live="polite"></p><div class="footer">公開データ候補：<a href="https://unpkg.com/@kotodaman-unofficial/dictionary/dist/words.json" target="_blank" rel="noopener">非公式辞書 JSON</a> / <a href="https://gaccag.com/kotodaman/dictionary/" target="_blank" rel="noopener">参考の辞書サイト</a>。これらは最新の全語を保証するものではありません。</div></section>
+<section class="panel" id="dictionaryPanel"><div class="head"><h2>① ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">旧版の非公式辞書を利用します。公開版では同梱データを初回自動読み込みし、以降は端末内に保存した辞書を復元します。友人の端末でも最初に辞書を読み込んでください。iPhoneで自動取得に失敗する場合は、Web上に公開したURLから開くか、JSON / CSV / TXTを「ファイルを選ぶ」で読み込んでください。</p><div class="row"><button id="fetchDict">公開辞書を読み込む</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">ファイルを選ぶ<input id="file" type="file" accept=".json,.csv,.txt" hidden></label><button id="clearDict" class="secondary">辞書を解除</button></div><p id="status" class="hint" aria-live="polite"></p><div class="footer">公開データ候補：<a href="https://unpkg.com/@kotodaman-unofficial/dictionary/dist/words.json" target="_blank" rel="noopener">非公式辞書 JSON</a> / <a href="https://gaccag.com/kotodaman/dictionary/" target="_blank" rel="noopener">参考の辞書サイト</a>。これらは最新の全語を保証するものではありません。</div></section>
 <section class="panel" id="supplementPanel"><div class="head"><h2>辞書の不足語を補完</h2><span class="tab" id="extraBadge">追加 0語</span></div>
 <p class="hint">ゲーム内で成立を確認した言葉を登録できます。追加語は検索候補・部分語・予測コンボに反映され、この端末に保存されます。他の端末や友人へはTXTを書き出して渡せます。</p>
 <div class="row"><input id="extraInput" type="text" placeholder="例：いこうき、いとうき" aria-label="追加したい言葉" style="flex:1;min-width:180px"><button id="addExtra" type="button">単語を追加</button></div>
@@ -539,8 +546,6 @@ drawDeck();listSaved();
 // The content is only visually collapsed in narrow view; desktop stays identical.
 (function setupMobileCompactPanels(){
  const sections=[
-  {panel:document.querySelector('section.panel'),label:'辞書設定'},
-  {panel:el('supplementPanel'),label:'不足語を補完'},
   {panel:el('deckPanel'),label:'デッキを編集'},
   {panel:el('handPanel'),label:'手札を選択'}
  ];
@@ -561,5 +566,17 @@ drawDeck();listSaved();
   });
   head.append(toggle);
  });
+})();
+// With the setup sections hidden on phones, the visible section numbers start at ①.
+(function keepSectionTitlesResponsive(){
+ const media=window.matchMedia('(max-width:600px)');
+ const deckTitle=document.querySelector('#deckPanel > .head > h2');
+ const searchTitle=document.querySelector('#searchPanel > h2');
+ const update=()=>{
+  if(deckTitle)deckTitle.textContent=media.matches?'① 12体を登録・保存':'② 12体を登録・保存';
+  if(searchTitle)searchTitle.textContent=media.matches?'② 盤面を入力して検索':'③ 盤面を入力して検索';
+ };
+ media.addEventListener?.('change',update);
+ update();
 })();
 </script><script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script></body></html>
