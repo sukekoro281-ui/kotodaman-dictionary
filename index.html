@@ -182,7 +182,7 @@
 
 /* Screen-space explanation / summary are intentionally not displayed on any device */
 #searchPanel .board-preview, #searchPanel .stat, #searchPanel #boardPreviewLetters, #searchPanel #boardLength {display:none !important}
-</style><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
+</style><meta name="app-build" content="20261021-board-sync-v2"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2><div class="row"><button class="secondary" id="saveDeck">全員に保存</button><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><button class="secondary" id="clearHand" type="button">手札解除</button></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select><button id="loadDeck" class="secondary">呼び出す・編集</button><button id="deleteDeck" class="danger" hidden>削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラの「＋手札」を押して最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
@@ -198,7 +198,7 @@
 </section>
 
 <div class="footer">登録デッキはこのブラウザ内に保存されます。辞書は端末内へのキャッシュを試みます（Safariのストレージ削除などで失われる場合があります）。このHTMLは単体で動きます。キャラの属性は色分け表示します。キャラ画像は登録済みの外部画像URLから表示します。画像が読み込めない場合は属性表示に切り替わります。スクショからのキャラ自動認識は未実装です。</div></main><script>
-const boardField=document.getElementById('board');let boardComposing=false;
+const boardField=document.getElementById('board');let boardComposing=false;let lastSearchedBoard=null;
 const localImages=new Map();let imageUrls=[];
 const desktopImagesKey='kotodaman-desktop-character-images-v1';
 let desktopCharacterImages={};
@@ -695,8 +695,11 @@ updateBoardPresentation();
 function search(){
  const root=el('result');root.replaceChildren();
  commitBoardInput();
- if(!baseWords.length&&!extraWords.length){root.className='notice';root.textContent='辞書を読み込み中です。読み込めない場合は「公開辞書を読み込む」を押してください。';return}
+ // Board input is the single source of truth. Never reuse an older pattern.
  const pattern=boardPattern(boardField.value);
+ lastSearchedBoard=pattern.join('');
+ root.dataset.searchedBoard=lastSearchedBoard;
+ if(!baseWords.length&&!extraWords.length){root.className='notice';root.textContent='辞書を読み込み中です。読み込めない場合は「公開辞書を読み込む」を押してください。';return}
  if(!pattern.length){root.className='notice';root.textContent='盤面を入力してください。';return}
  if(!pattern.every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c))){root.className='notice';root.textContent='ひらがなと「○」で盤面を入力してください。';return}
  const deck=options();
@@ -797,6 +800,30 @@ function search(){
  if(res.length>300){const p=document.createElement('p');p.className='hint';p.textContent=mobileResults?'候補が多いため、最大300件まで表示できます。':'結果が多いため、上位300語を表示しています。';root.append(p)}
 }
 el('onlyDeck').onchange=()=>search();el('preferHand').onchange=()=>search();el('sortMode').onchange=()=>search();el('search').onclick=()=>search();el('reset').onclick=()=>{clearTimeout(searchTimer);boardComposing=false;boardField.value='';mobileResultLimit=8;commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();search()}});
+// iOS Safari can occasionally miss a composition/input/change notification.
+// Even if an event is missed, prevent 5-character search results from
+// remaining under a 7-character board. Work is performed only on a mismatch.
+function verifyBoardResultsAreCurrent(){
+ const actual=boardPattern(boardField.value).join('');
+ const root=el('result');
+ const resultLength=[...actual].length;
+ const invalidBadge=[...root.querySelectorAll('.word .length-badge')].some(b=>{
+  const num=parseInt(b.textContent,10);
+  return Number.isFinite(num)&&num!==resultLength;
+ });
+ if(actual!==lastSearchedBoard || invalidBadge){
+  clearTimeout(searchTimer);
+  invalidateSearchResults();
+  search();
+ }
+}
+// Small, constant-time watch to reconcile Safari's IME and page restoration.
+setInterval(verifyBoardResultsAreCurrent,450);
+boardField.addEventListener('keyup',()=>{if(!boardComposing&&boardPattern(boardField.value).join('')!==lastSearchedBoard)scheduleSearch(40)});
+boardField.addEventListener('blur',verifyBoardResultsAreCurrent);
+window.addEventListener('pageshow',()=>setTimeout(verifyBoardResultsAreCurrent,100));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(verifyBoardResultsAreCurrent,100)});
+
 // Draft persistence is device-local, independent of named decks.
 const draftKey='kotodaman-dictionary-draft-v1';
 function persistDraft(){try{localStorage.setItem(draftKey,JSON.stringify({name:el('deckName').value,slots}));el('draftStatus').textContent='✓ この端末に入力内容を自動保存しました'}catch(e){el('draftStatus').textContent='端末に自動保存できません。JSON書き出しでバックアップしてください。'}}
@@ -886,4 +913,4 @@ window.kotodamanCloudBridge={
  media.addEventListener?.('change',update);
  update();
 })();
-</script><script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script><script type="module" src="./public-decks.js"></script></body></html>
+</script><script type="module" src="./public-decks.js"></script></body></html>
