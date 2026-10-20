@@ -182,13 +182,39 @@
 
 /* Screen-space explanation / summary are intentionally not displayed on any device */
 #searchPanel .board-preview, #searchPanel .stat, #searchPanel #boardPreviewLetters, #searchPanel #boardLength {display:none !important}
-</style><meta name="app-build" content="20261021-board-sync-v2"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
+
+/* Manually marked wall cells: OCR remains board-text-only. */
+.wall-controls{margin:10px 0 5px;padding:10px 12px;border:1px solid #c4d5ee;border-radius:12px;background:#f7faff}
+.wall-controls[hidden]{display:none!important}
+.wall-tip{margin:4px 0 9px;color:#51637b;font-size:12px;line-height:1.55}
+.wall-position-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;max-width:510px}
+.wall-position{min-width:0;min-height:55px;padding:5px 2px;border:2px solid #d5e0ee;border-radius:9px;background:#fff;color:#253953;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700}
+.wall-position .wall-number{font-size:10px;color:#657993}
+.wall-position .wall-char{font-size:19px}
+.wall-position[aria-pressed="true"]{background:#f4e5fb;border-color:#a855f7;color:#7427a2}
+.wall-position[aria-pressed="true"] .wall-number{color:#7427a2}
+.wall-position:focus-visible{outline:3px solid #73b1ff;outline-offset:2px}
+.wall-zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:13px;align-items:start;margin-top:10px}
+.wall-zone{min-width:0;padding:12px;border:1px solid #d5e1f2;border-radius:12px;background:#fcfdff}
+.wall-zone h3{font-size:15px;margin:0 0 4px;color:#214774}
+.wall-zone .word{padding:11px 0;gap:2px}
+.wall-zone .word strong{font-size:18px}
+.wall-zone .result-main{gap:5px}
+.wall-zone .hint{font-size:12px;line-height:1.5}
+.wall-description{font-size:12px;color:#5c6a80;line-height:1.55;margin:9px 0}
+@media(max-width:600px){.wall-controls{padding:9px 8px}.wall-position-grid{gap:3px}.wall-position{padding:4px 1px;min-height:51px}.wall-position .wall-char{font-size:18px}.wall-zones{grid-template-columns:minmax(0,1fr);gap:9px}.wall-zone{padding:10px}}
+</style><meta name="app-build" content="20261021-manual-wall-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2><div class="row"><button class="secondary" id="saveDeck">全員に保存</button><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><button class="secondary" id="clearHand" type="button">手札解除</button></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select><button id="loadDeck" class="secondary">呼び出す・編集</button><button id="deleteDeck" class="danger" hidden>削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラの「＋手札」を押して最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
 <section class="panel" id="searchPanel"><h2>② 盤面を入力して検索</h2>
 <p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
-<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="general-dict-controls"><label><input id="includeGeneralWords" type="checkbox" checked> 一般辞書の候補も表示</label><span id="generalWordsStatus">一般辞書：読み込み中</span><a href="dictionary-sources.html" target="_blank" rel="noopener">出典・注意事項</a></div><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
+<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="row" style="margin:9px 0 0"><label class="switch"><input id="wallMode" type="checkbox"> ウォールあり（位置を手動指定）</label></div>
+<div id="wallControls" class="wall-controls" hidden>
+ <div class="wall-tip">ウォールがあるマスをタップしてください（複数選択可）。ウォールのマスは左右両方の言葉に含み、ウォールをまたぐ言葉は候補から除外します。</div>
+ <div id="wallPositionGrid" class="wall-position-grid" role="group" aria-label="ウォールがあるマスを選択"></div>
+ <div id="wallStatus" class="hint" aria-live="polite" style="margin-top:7px">ウォール位置を選択してください。</div>
+</div><div class="general-dict-controls"><label><input id="includeGeneralWords" type="checkbox" checked> 一般辞書の候補も表示</label><span id="generalWordsStatus">一般辞書：読み込み中</span><a href="dictionary-sources.html" target="_blank" rel="noopener">出典・注意事項</a></div><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
 <section class="panel" id="dictionaryPanel"><div class="head"><h2>③ ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">旧版の非公式辞書を利用します。公開版では同梱データを初回自動読み込みし、以降は端末内に保存した辞書を復元します。友人の端末でも最初に辞書を読み込んでください。iPhoneで自動取得に失敗する場合は、Web上に公開したURLから開くか、JSON / CSV / TXTを「ファイルを選ぶ」で読み込んでください。</p><div class="row"><button id="fetchDict">公開辞書を読み込む</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">ファイルを選ぶ<input id="file" type="file" accept=".json,.csv,.txt" hidden></label><button id="clearDict" class="secondary">辞書を解除</button></div><p id="status" class="hint" aria-live="polite"></p><div class="footer">公開データ候補：<a href="https://unpkg.com/@kotodaman-unofficial/dictionary/dist/words.json" target="_blank" rel="noopener">非公式辞書 JSON</a> / <a href="https://gaccag.com/kotodaman/dictionary/" target="_blank" rel="noopener">参考の辞書サイト</a>。これらは最新の全語を保証するものではありません。</div></section>
 <section class="panel" id="supplementPanel"><div class="head"><h2>辞書の不足語を補完</h2><span class="tab" id="extraBadge">追加 0語</span></div>
 <p class="hint">ゲーム内で成立を確認した言葉を登録できます。追加語は検索候補・部分語・予測コンボに反映され、この端末に保存されます。他の端末や友人へはTXTを書き出して渡せます。</p>
@@ -198,7 +224,7 @@
 </section>
 
 <div class="footer">登録デッキはこのブラウザ内に保存されます。辞書は端末内へのキャッシュを試みます（Safariのストレージ削除などで失われる場合があります）。このHTMLは単体で動きます。キャラの属性は色分け表示します。キャラ画像は登録済みの外部画像URLから表示します。画像が読み込めない場合は属性表示に切り替わります。スクショからのキャラ自動認識は未実装です。</div></main><script>
-const boardField=document.getElementById('board');let boardComposing=false;let lastSearchedBoard=null;
+const boardField=document.getElementById('board');let boardComposing=false;let lastSearchedBoard=null;let wallMode;
 const localImages=new Map();let imageUrls=[];
 const desktopImagesKey='kotodaman-desktop-character-images-v1';
 let desktopCharacterImages={};
@@ -648,6 +674,7 @@ function invalidateSearchResults(){
  if(root){root.replaceChildren();root.className='notice';root.textContent='盤面に合わせて検索中です…';}
 }
 function scheduleSearch(delay=180){
+ if(typeof wallMode!=='undefined')renderWallPositionButtons();
  invalidateSearchResults();
  mobileResultLimit=8;
  clearTimeout(searchTimer);
@@ -692,6 +719,133 @@ boardField.addEventListener('input',()=>{commitBoardInput();if(boardComposing){c
 boardField.addEventListener('change',()=>{commitBoardInput();scheduleSearch(0)});
 el('insertBlank').addEventListener('click',()=>{insertBoardBlank();scheduleSearch(0)});
 updateBoardPresentation();
+// Manual wall-marker. The OCR pipeline should not attempt wall detection.
+wallMode=el('wallMode');
+const wallControls=el('wallControls');
+const wallPositionGrid=el('wallPositionGrid');
+const wallStatus=el('wallStatus');
+const wallCells=new Set(); // 1-based position of the wall-bearing tile
+for(let i=1;i<=7;i++){
+ const btn=document.createElement('button');btn.type='button';btn.className='wall-position';
+ btn.dataset.index=String(i);btn.setAttribute('aria-pressed','false');
+ const number=document.createElement('span');number.className='wall-number';number.textContent=`${i}マス目`;
+ const char=document.createElement('span');char.className='wall-char';char.textContent='○';
+ btn.append(number,char);
+ btn.addEventListener('click',()=>{
+  if(wallCells.has(i))wallCells.delete(i);else wallCells.add(i);
+  renderWallPositionButtons();mobileResultLimit=8;search();
+ });
+ wallPositionGrid.append(btn);
+}
+function renderWallPositionButtons(){
+ wallControls.hidden=!wallMode.checked;
+ const current=boardPattern(boardField.value);
+ for(const btn of wallPositionGrid.children){
+  const position=Number(btn.dataset.index);
+  const marked=wallCells.has(position);
+  btn.setAttribute('aria-pressed',marked?'true':'false');
+  btn.querySelector('.wall-char').textContent=current[position-1]||'·';
+  btn.setAttribute('aria-label',`${position}マス目「${current[position-1]||'未入力'}」${marked?'、ウォール指定済み':'、ウォールなし'}`);
+ }
+ wallStatus.textContent=wallCells.size?
+  `ウォール位置：${[...wallCells].sort((a,b)=>a-b).map(x=>x+'マス目').join('・')}（タップで解除）`:
+  'ウォール位置を選択してください。';
+}
+wallMode.addEventListener('change',()=>{renderWallPositionButtons();mobileResultLimit=8;search()});
+renderWallPositionButtons();
+// A wall at position p is shared by the left and right word.
+// Legal words cannot have a wall strictly between their first and last tile.
+function makeWallZones(pattern){
+ const positions=[...wallCells].sort((a,b)=>a-b);
+ const endPoints=[1,...positions,pattern.length];
+ const zones=[];
+ for(let k=1;k<endPoints.length;k++){
+  const start=endPoints[k-1],end=endPoints[k];
+  if(start>end)continue;
+  const name=zones.length===0?'左側':(k===endPoints.length-1?'右側':`区間${k+1}`);
+  zones.push({start,end,name,pattern:pattern.slice(start-1,end)});
+ }
+ return zones;
+}
+function drawWallCandidate(entry,zone){
+ const row=document.createElement('div');row.className='word';
+ if(entry.handPossible&&activeHand.length)row.classList.add('hand-first');
+ const left=document.createElement('div');
+ const head=document.createElement('div');head.className='result-main';
+ const title=document.createElement('strong');title.textContent=entry.word;head.append(title);
+ const score=document.createElement('span');score.className='combo-count';
+ score.textContent=`区間コンボ候補 ${entry.combo.count}`;head.append(score);
+ const status=document.createElement('span');status.className=entry.buildable?'hand-first-label':'chip';
+ status.textContent=entry.buildable?'デッキで作れる':'辞書候補';head.append(status);
+ if(entry.generalOnly){const badge=document.createElement('span');badge.className='chip';badge.textContent='一般辞書・ゲーム内未確認';head.append(badge)}
+ if(entry.handPossible&&activeHand.length){const badge=document.createElement('span');badge.className='hand-first-label';badge.textContent='手札で作れる';head.append(badge)}
+ left.append(head);
+ if(entry.combo.matches?.length){
+  const line=document.createElement('div');line.className='combo-terms';
+  line.textContent='区間内の部分語：'+entry.combo.matches.slice(0,7).map(m=>`${m.word}(${m.start+zone.start-1}-${m.end+zone.start-1})`).join(' / ');
+  left.append(line);
+ }
+ row.append(left);return row;
+}
+function searchWall(pattern,root){
+ root.className='';
+ if(pattern.length!==7){
+  root.className='notice';root.textContent='ウォール検索は7マスの盤面を入力してから使ってください。';return;
+ }
+ if(!wallCells.size){
+  root.className='notice';root.textContent='上の7マスからウォールの位置を選択してください。';return;
+ }
+ const deck=options();
+ const handDeck=deck.filter(card=>activeHand.includes(card.id));
+ const preferHand=el('preferHand').checked&&activeHand.length>0;
+ const onlyDeck=el('onlyDeck').checked;
+ const sortMode=el('sortMode').value;
+ const zones=makeWallZones(pattern);
+ const description=document.createElement('p');description.className='wall-description';
+ description.textContent='ウォールをまたがない範囲ごとの候補です。ウォールのマスは両側に含みます。コンボ数は各区間の参考値で、全盤面の合計コンボ数ではありません。';
+ root.append(description);
+ const grid=document.createElement('div');grid.className='wall-zones';
+ for(let zi=0;zi<zones.length;zi++){
+  const zone=zones[zi];
+  const wrapper=document.createElement('section');wrapper.className='wall-zone';
+  const heading=document.createElement('h3');
+  const zoneLabel=zones.length===2?(zi===0?'左側':'右側'):(zi===0?'左側':zi===zones.length-1?'右側':`中央${zi}`);
+  heading.textContent=`${zoneLabel}：${zone.start}～${zone.end}マス目（${zone.pattern.join('')}）`;
+  wrapper.append(heading);
+  if(zone.pattern.length<2){const empty=document.createElement('p');empty.className='hint';empty.textContent='1文字のため、単語候補はありません。';wrapper.append(empty);grid.append(wrapper);continue}
+  const results=[];
+  for(const word of (wordsByLength.get(zone.pattern.length)||[])){
+   const letters=[...word];let good=true;const need=[];
+   for(let j=0;j<letters.length;j++){
+    if(zone.pattern[j]==='○')need.push({position:zone.start+j,char:letters[j]});
+    else if(zone.pattern[j]!==letters[j]){good=false;break}
+   }
+   if(!good)continue;
+   const assignment=deck.length?assign(need,deck):null;
+   const handAssignment=handDeck.length?assign(need,handDeck):null;
+   const entry={word,buildable:!!assignment,handPossible:!!handAssignment,generalOnly:generalWordSet.has(word),combo:predictCombos(word)};
+   if(onlyDeck&&!entry.buildable)continue;
+   results.push(entry);
+  }
+  results.sort((a,b)=>{
+   if(preferHand&&a.handPossible!==b.handPossible)return Number(b.handPossible)-Number(a.handPossible);
+   if(sortMode==='combo'&&a.combo.count!==b.combo.count)return b.combo.count-a.combo.count;
+   return a.word.localeCompare(b.word,'ja');
+  });
+  const count=document.createElement('p');count.className='hint';count.textContent=`候補 ${results.length}語`;wrapper.append(count);
+  const visibleCount=Math.min(results.length,window.matchMedia('(max-width:600px)').matches?mobileResultLimit:80);
+  for(const entry of results.slice(0,visibleCount))wrapper.append(drawWallCandidate(entry,zone));
+  if(!results.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=onlyDeck?'デッキで作れる候補はありません。':'一致する語がありません。';wrapper.append(empty)}
+  if(visibleCount<results.length){
+   const more=document.createElement('button');more.className='secondary';more.type='button';
+   more.textContent=`さらに表示（${visibleCount} / ${results.length}）`;
+   more.addEventListener('click',()=>{mobileResultLimit=Math.min(300,mobileResultLimit+8);search()});
+   wrapper.append(more);
+  }
+  grid.append(wrapper);
+ }
+ root.append(grid);
+}
 function search(){
  const root=el('result');root.replaceChildren();
  commitBoardInput();
@@ -702,6 +856,7 @@ function search(){
  if(!baseWords.length&&!extraWords.length){root.className='notice';root.textContent='辞書を読み込み中です。読み込めない場合は「公開辞書を読み込む」を押してください。';return}
  if(!pattern.length){root.className='notice';root.textContent='盤面を入力してください。';return}
  if(!pattern.every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c))){root.className='notice';root.textContent='ひらがなと「○」で盤面を入力してください。';return}
+ if(wallMode&&wallMode.checked){searchWall(pattern,root);return;}
  const deck=options();
  const handDeck=deck.filter(card=>activeHand.includes(card.id));
  const matched=[];
@@ -777,18 +932,7 @@ function search(){
    comboTerms.textContent='予想コンボ候補：'+uniq.join(' / ');
    left.append(comboTerms);
   }
-  const chips=document.createElement('div');chips.className='chips';
-  if(obj.assignment){
-   for(const a of (obj.handPossible?obj.handAssignment:obj.assignment)){
-    const c=document.createElement('span');c.className='chip';c.textContent=`${a.position}文字目「${a.char}」← ${a.name}`;chips.append(c);
-   }
-  }else if(obj.need.length){
-   const c=document.createElement('span');c.className='chip';
-   c.textContent='必要な文字：'+obj.need.map(x=>`${x.position}番目「${x.char}」`).join('、');chips.append(c);
-  }else{
-   const c=document.createElement('span');c.className='chip';c.textContent='追加文字なし';chips.append(c);
-  }
-  row.append(left,chips);root.append(row);
+  row.append(left);root.append(row);
  }
  if(mobileResults&&res.length>displayLimit){
   const more=document.createElement('button');more.type='button';more.className='more-mobile-results';
@@ -799,7 +943,7 @@ function search(){
  }
  if(res.length>300){const p=document.createElement('p');p.className='hint';p.textContent=mobileResults?'候補が多いため、最大300件まで表示できます。':'結果が多いため、上位300語を表示しています。';root.append(p)}
 }
-el('onlyDeck').onchange=()=>search();el('preferHand').onchange=()=>search();el('sortMode').onchange=()=>search();el('search').onclick=()=>search();el('reset').onclick=()=>{clearTimeout(searchTimer);boardComposing=false;boardField.value='';mobileResultLimit=8;commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();search()}});
+el('onlyDeck').onchange=()=>search();el('preferHand').onchange=()=>search();el('sortMode').onchange=()=>search();el('search').onclick=()=>search();el('reset').onclick=()=>{clearTimeout(searchTimer);boardComposing=false;boardField.value='';wallMode.checked=false;wallCells.clear();renderWallPositionButtons();mobileResultLimit=8;commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();search()}});
 // iOS Safari can occasionally miss a composition/input/change notification.
 // Even if an event is missed, prevent 5-character search results from
 // remaining under a 7-character board. Work is performed only on a mismatch.
@@ -807,7 +951,7 @@ function verifyBoardResultsAreCurrent(){
  const actual=boardPattern(boardField.value).join('');
  const root=el('result');
  const resultLength=[...actual].length;
- const invalidBadge=[...root.querySelectorAll('.word .length-badge')].some(b=>{
+ const invalidBadge=!wallMode.checked&&[...root.querySelectorAll('.word .length-badge')].some(b=>{
   const num=parseInt(b.textContent,10);
   return Number.isFinite(num)&&num!==resultLength;
  });
