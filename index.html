@@ -1,6 +1,6 @@
 <!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>コトダマン辞書｜12体デッキことば検索</title><style>
 :root{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#1c273a;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1050px;margin:auto;padding:22px 16px 60px}h1{font-size:25px;margin:0 0 5px}h2{font-size:17px;margin:0 0 13px}.sub,.hint{color:#66758b;font-size:13px}.panel{background:white;border:1px solid #e2e8f2;border-radius:17px;padding:18px;margin:16px 0;box-shadow:0 3px 16px #162c4a0a}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.grow{flex:1;min-width:190px}input,select,button{font:inherit}input,select{border:1px solid #ccd6e4;border-radius:10px;padding:11px 12px;background:#fff;max-width:100%}button{border:0;border-radius:10px;background:#2563eb;color:white;font-weight:650;padding:11px 15px;cursor:pointer}button.secondary{background:#e9eef7;color:#30425e}button.danger{background:#ffedf0;color:#a52f4a}button:disabled{opacity:.55;cursor:not-allowed}.wide{width:100%}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:10px}.slot{border:1px solid #e1e7f0;border-radius:12px;padding:12px}.slot small{display:block;color:#687992;margin-bottom:5px}.slot input{width:100%;margin-bottom:7px}.slot .letters{margin-bottom:0}.search-results{max-height:195px;overflow:auto;border:1px solid #d6e2ef;border-radius:10px;margin:5px 0}.candidate{display:flex;align-items:center;gap:9px;width:100%;text-align:left;border-radius:0;background:white;color:#233c5e;border-bottom:1px solid #e7edf6;padding:8px 10px;font-size:13px}.candidate:hover{background:#e7f0ff}.candidate-img{height:57px;width:65px;object-fit:contain;flex-shrink:0;border-radius:7px;background:#f0f4fa}.candidate-title{display:block;font-weight:700}.candidate-meta{display:block;font-weight:400;font-size:12px;color:#66758b;margin-top:3px}.candidate-copy{min-width:0;overflow-wrap:anywhere}.candidate-placeholder{width:65px;height:57px;background:#edf2f8;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#7c8795;font-size:11px}.candidate small{display:inline;color:#637590}.slot .selected{font-size:12px;color:#17734c;margin:4px 0}.catalog-badge{font-size:12px;color:#60738c;margin:8px 0}.board{font-size:25px;letter-spacing:.10em;font-weight:700;width:100%;max-width:340px;text-align:center}.word{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid #e7ecf3}.word strong{font-size:22px;letter-spacing:.06em}.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:#e8f0ff;color:#2456a2;border-radius:7px;padding:5px 9px;font-size:12px}.stat{font-size:13px;color:#586b84;margin:12px 0}.notice{background:#fff7e7;border:1px solid #f5dfac;padding:12px;border-radius:10px;font-size:13px;color:#775014}.empty{text-align:center;padding:25px;color:#7c899b}.switch{display:flex;align-items:center;gap:6px;font-size:13px}.switch input{padding:0}.muted{font-weight:400;color:#7b899d}.head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}.footer{font-size:12px;color:#7b899d;line-height:1.6}.tab{display:inline-block;background:#e9eef7;color:#34445a;padding:6px 10px;border-radius:8px;font-size:12px}#status{min-height:18px}
-.attribute-icon{width:65px;height:57px;flex-shrink:0;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;letter-spacing:.02em;border:2px solid var(--edge);color:var(--ink);background:var(--fill)}.attribute-icon[data-attribute="火"]{--fill:#ffe4e1;--edge:#f05a4c;--ink:#b72318}.attribute-icon[data-attribute="水"]{--fill:#deefff;--edge:#428cde;--ink:#165aa8}.attribute-icon[data-attribute="木"]{--fill:#e0f5d9;--edge:#55a84b;--ink:#216b2c}.attribute-icon[data-attribute="光"]{--fill:#fff4be;--edge:#dfb531;--ink:#856000}.attribute-icon[data-attribute="闇"]{--fill:#efe2ff;--edge:#9454d7;--ink:#622699}.attribute-icon[data-attribute="冥"]{--fill:#ede9f0;--edge:#786585;--ink:#41334c}.attribute-icon[data-attribute="天"]{--fill:#e2f6fb;--edge:#5aa4b9;--ink:#246579}.attribute-icon[data-attribute="虹"]{--fill:linear-gradient(125deg,#ff8787 0%,#ffdf79 22%,#bcf78d 43%,#86d8ff 64%,#b9a3f4 82%,#f2a5e4 100%);--edge:#a169c8;--ink:#48245b}.selected-attribute{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:2px 7px;margin-right:5px;font-weight:700;color:var(--ink);background:var(--fill);border:1px solid var(--edge)}.selected-attribute[data-attribute="火"]{--fill:#ffe4e1;--edge:#f05a4c;--ink:#b72318}.selected-attribute[data-attribute="水"]{--fill:#deefff;--edge:#428cde;--ink:#165aa8}.selected-attribute[data-attribute="木"]{--fill:#e0f5d9;--edge:#55a84b;--ink:#216b2c}.selected-attribute[data-attribute="光"]{--fill:#fff4be;--edge:#dfb531;--ink:#856000}.selected-attribute[data-attribute="闇"]{--fill:#efe2ff;--edge:#9454d7;--ink:#622699}.selected-attribute[data-attribute="冥"]{--fill:#ede9f0;--edge:#786585;--ink:#41334c}.selected-attribute[data-attribute="天"]{--fill:#e2f6fb;--edge:#5aa4b9;--ink:#246579}.selected-attribute[data-attribute="虹"]{--fill:linear-gradient(125deg,#ff8787 0%,#ffdf79 22%,#bcf78d 43%,#86d8ff 64%,#b9a3f4 82%,#f2a5e4 100%);--edge:#a169c8;--ink:#48245b}.combo-count{font-size:13px;font-weight:750;color:#134e4a;background:#ccfbf1;border-radius:8px;padding:5px 8px;white-space:nowrap}.gimmick-badge{font-size:12px;font-weight:750;color:#7c2d12;background:#ffedd5;border-radius:8px;padding:5px 8px}.gimmick-split{font-size:13px;color:#9a3412;font-weight:650;margin-top:5px}.combo-terms{font-size:11px;color:#64748b;margin-top:4px;max-width:520px;line-height:1.5}.sort-selector{min-width:170px}.result-main{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.shot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}.shot-card{border:1px solid #d9e3f1;border-radius:12px;padding:10px;background:#fbfcff}.shot-card img{display:block;width:120px;height:110px;object-fit:contain;margin:auto;background:#e7edf5;border-radius:9px}.shot-card input{width:100%;margin-top:8px}.shot-matches{max-height:130px;overflow:auto}.shot-matches button{width:100%;text-align:left;background:#eef3ff;color:#253b59;border-radius:5px;padding:6px;margin:3px 0;font-size:12px}.shot-card .confirmed{color:#087445;font-size:12px;min-height:22px}.shot-card small{color:#61748e}
+.attribute-icon{width:65px;height:57px;flex-shrink:0;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;letter-spacing:.02em;border:2px solid var(--edge);color:var(--ink);background:var(--fill)}.attribute-icon[data-attribute="火"]{--fill:#ffe4e1;--edge:#f05a4c;--ink:#b72318}.attribute-icon[data-attribute="水"]{--fill:#deefff;--edge:#428cde;--ink:#165aa8}.attribute-icon[data-attribute="木"]{--fill:#e0f5d9;--edge:#55a84b;--ink:#216b2c}.attribute-icon[data-attribute="光"]{--fill:#fff4be;--edge:#dfb531;--ink:#856000}.attribute-icon[data-attribute="闇"]{--fill:#efe2ff;--edge:#9454d7;--ink:#622699}.attribute-icon[data-attribute="冥"]{--fill:#ede9f0;--edge:#786585;--ink:#41334c}.attribute-icon[data-attribute="天"]{--fill:#e2f6fb;--edge:#5aa4b9;--ink:#246579}.attribute-icon[data-attribute="虹"]{--fill:linear-gradient(125deg,#ff8787 0%,#ffdf79 22%,#bcf78d 43%,#86d8ff 64%,#b9a3f4 82%,#f2a5e4 100%);--edge:#a169c8;--ink:#48245b}.selected-attribute{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:2px 7px;margin-right:5px;font-weight:700;color:var(--ink);background:var(--fill);border:1px solid var(--edge)}.selected-attribute[data-attribute="火"]{--fill:#ffe4e1;--edge:#f05a4c;--ink:#b72318}.selected-attribute[data-attribute="水"]{--fill:#deefff;--edge:#428cde;--ink:#165aa8}.selected-attribute[data-attribute="木"]{--fill:#e0f5d9;--edge:#55a84b;--ink:#216b2c}.selected-attribute[data-attribute="光"]{--fill:#fff4be;--edge:#dfb531;--ink:#856000}.selected-attribute[data-attribute="闇"]{--fill:#efe2ff;--edge:#9454d7;--ink:#622699}.selected-attribute[data-attribute="冥"]{--fill:#ede9f0;--edge:#786585;--ink:#41334c}.selected-attribute[data-attribute="天"]{--fill:#e2f6fb;--edge:#5aa4b9;--ink:#246579}.selected-attribute[data-attribute="虹"]{--fill:linear-gradient(125deg,#ff8787 0%,#ffdf79 22%,#bcf78d 43%,#86d8ff 64%,#b9a3f4 82%,#f2a5e4 100%);--edge:#a169c8;--ink:#48245b}.combo-count{font-size:13px;font-weight:750;color:#134e4a;background:#ccfbf1;border-radius:8px;padding:5px 8px;white-space:nowrap}.length-badge{font-size:12px;font-weight:750;color:#1d4ed8;background:#dbeafe;border-radius:8px;padding:5px 8px;white-space:nowrap}.gimmick-badge{font-size:12px;font-weight:750;color:#7c2d12;background:#ffedd5;border-radius:8px;padding:5px 8px}.gimmick-split{font-size:13px;color:#9a3412;font-weight:650;margin-top:5px}.combo-terms{font-size:11px;color:#64748b;margin-top:4px;max-width:520px;line-height:1.5}.sort-selector{min-width:170px}.result-main{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.shot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}.shot-card{border:1px solid #d9e3f1;border-radius:12px;padding:10px;background:#fbfcff}.shot-card img{display:block;width:120px;height:110px;object-fit:contain;margin:auto;background:#e7edf5;border-radius:9px}.shot-card input{width:100%;margin-top:8px}.shot-matches{max-height:130px;overflow:auto}.shot-matches button{width:100%;text-align:left;background:#eef3ff;color:#253b59;border-radius:5px;padding:6px;margin:3px 0;font-size:12px}.shot-card .confirmed{color:#087445;font-size:12px;min-height:22px}.shot-card small{color:#61748e}
 @media(max-width:600px){.wrap{padding:15px 11px 38px}h1{font-size:22px}.panel{padding:14px;border-radius:13px;margin:11px 0}.grid{grid-template-columns:1fr}.board{font-size:22px}.row button{font-size:14px}.slot{padding:11px}.head{align-items:flex-start}.candidate{min-height:55px}input,select{font-size:16px}button{min-height:43px}}html{scroll-behavior:smooth}button:focus-visible,input:focus-visible{outline:3px solid #7fb8ff;outline-offset:2px}
 
 .hand-choice{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.hand-choice button{background:#f2f6fd;color:#2b3b58;border:2px solid #dce5f4;min-height:62px;padding:9px 5px;font-size:12px;overflow-wrap:anywhere}.hand-choice button.active{background:#dbeafe;border-color:#2563eb;color:#1d4ed8}.hand-choice button:disabled{opacity:.48}.hand-letters{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.hand-letter{background:#eff6ff;color:#1d4ed8;border:1px solid #c5ddff;border-radius:10px;padding:9px 12px;min-width:42px;text-align:center;font-size:20px;font-weight:750}.hand-letter small{display:block;font-size:10px;font-weight:400;color:#64748b}.hand-first{background:#ecfdf5!important;border-left:4px solid #059669;padding-left:10px!important}.hand-first-label{display:inline-flex;align-items:center;background:#dcfce7;border:1px solid #86efac;color:#166534;padding:3px 7px;border-radius:7px;font-size:12px;font-weight:700;margin-left:7px}.hand-priority-note{background:#effdf6;border:1px solid #a7f3d0;border-radius:9px;padding:9px 11px;margin:10px 0;color:#166534;font-size:13px}.hand-choice .hand-slot{display:block;font-size:10px;color:#64748b;margin-bottom:3px}@media(max-width:480px){.hand-choice{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -22,9 +22,9 @@
 .board-shell .board{display:block;max-width:none;position:relative;margin:0;z-index:1;color:transparent;-webkit-text-fill-color:transparent;caret-color:#1d4ed8;background:transparent;font-variant-ligatures:none}
 .board-shell .board::selection{background:#b9d7ff;-webkit-text-fill-color:transparent}
 .board-shell .board::placeholder{color:#8090a7;-webkit-text-fill-color:#8090a7}
-.board-mirror{position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:pre;padding:11px 12px;border:1px solid transparent;border-radius:10px;font-family:inherit;font-weight:700;font-size:25px;line-height:normal;letter-spacing:.10em;color:#1c273a;font-variant-ligatures:none}
+.board-mirror{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:pre;padding:11px 12px;border:1px solid transparent;border-radius:10px;font-family:inherit;font-weight:700;font-size:25px;line-height:normal;letter-spacing:.10em;color:#1c273a;font-variant-ligatures:none}
 .board-mirror .blank-glyph{color:#2563eb;background:#e6f0ff;border-radius:4px}
-.blank-button{background:#dbeafe;color:#1d4ed8;padding:11px 12px;white-space:nowrap}
+.board-preview{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:7px 0 2px;padding:8px 10px;background:#f3f7ff;border-radius:9px;width:fit-content;max-width:100%}.board-preview-label{font-size:12px;color:#66758b;margin-right:5px}.board-preview .letter{font-size:20px;font-weight:700;min-width:20px;text-align:center}.board-preview .letter.blank-glyph{color:#2563eb;background:#dbeafe;border-radius:5px;padding:2px 5px}.blank-button{background:#dbeafe;color:#1d4ed8;padding:11px 12px;white-space:nowrap}
 .blank-button:hover{background:#c5dcff}
 @media(max-width:600px){.board-mirror{font-size:22px}.board-shell{flex:1 1 100%;max-width:100%}.blank-button{flex:0 0 auto}}
 </style><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
@@ -40,7 +40,7 @@
 <section class="panel" id="handPanel"><div class="head"><h2>いまの手札・最大4体で作れることば</h2><button class="secondary" id="clearHand" type="button">手札を解除</button></div><p class="hint">下の12体デッキから、現在手札にある4体をタップして選んでください。選んだ手札のキャラだけで盤面の空欄を埋められる言葉を、検索結果の先頭に表示します。</p><div class="row"><span class="tab" id="handCount">0 / 4体</span><span id="handStatus" class="hint">まず12体を登録してください。</span></div><div id="handChoices" class="hand-choice"></div><div id="handLetters" class="hand-letters" style="display:none" aria-hidden="true"><span class="hint">4体を選ぶと文字を表示します。</span></div></section>
 <section class="panel"><h2>③ 盤面を入力して検索</h2>
 <p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
-<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="かい○○き" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand" checked> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="gimmick" selected>ギミック破壊向け（長い連続語優先）</option><option value="combo">予測コンボ数が多い順</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><p class="hint"><span id="boardLength" aria-live="polite">5文字（空欄2マス）</span>・文字数は盤面から自動判定します。辞書にある候補はデッキ未登録でも表示します。デッキや手札で作れる言葉は上位に表示されます。「デッキで作れる語のみ」で絞り込み可能です。</p><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
+<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="かい○○き" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand" checked> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="gimmick" selected>ギミック破壊向け（長い連続語優先）</option><option value="combo">予測コンボ数が多い順</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="board-preview" aria-label="検索する盤面の文字と空欄"><span class="board-preview-label">検索する盤面：</span><span id="boardPreviewLetters" style="display:flex;gap:3px;flex-wrap:wrap"></span></div><p class="hint"><span id="boardLength" aria-live="polite">5文字（空欄2マス）</span>・文字数は盤面から自動判定します。辞書にある候補はデッキ未登録でも表示します。デッキや手札で作れる言葉は上位に表示されます。「デッキで作れる語のみ」で絞り込み可能です。</p><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
 <div class="footer">登録デッキはこのブラウザ内に保存されます。辞書は端末内へのキャッシュを試みます（Safariのストレージ削除などで失われる場合があります）。このHTMLは単体で動きます。キャラの属性は色分け表示します。キャラ画像は登録済みの外部画像URLから表示します。画像が読み込めない場合は属性表示に切り替わります。スクショからのキャラ自動認識は未実装です。</div></main><script>
 const boardField=document.getElementById('board');let boardComposing=false;
 const localImages=new Map();let imageUrls=[];
@@ -292,7 +292,20 @@ function updateBoardPresentation(){
   if(ch==='○')node.className='blank-glyph';
   mirror.append(node);
  }
+ const preview=el('boardPreviewLetters');
+ preview.replaceChildren();
+ for(const ch of text){
+  const node=document.createElement('span');
+  node.className='letter'+(ch==='○'?' blank-glyph':'');
+  node.textContent=ch;
+  preview.append(node);
+ }
  el('boardLength').textContent=`${[...text].length}文字（空欄${[...text].filter(c=>c==='○').length}マス）`;
+}
+let searchTimer=0;
+function scheduleSearch(delay=180){
+ clearTimeout(searchTimer);
+ searchTimer=setTimeout(()=>search(),delay);
 }
 function commitBoardInput(){
  if(boardComposing){updateBoardPresentation();return}
@@ -328,10 +341,10 @@ boardField.addEventListener('beforeinput',e=>{
  }
 });
 boardField.addEventListener('compositionstart',()=>{boardComposing=true});
-boardField.addEventListener('compositionend',()=>{boardComposing=false;commitBoardInput()});
-boardField.addEventListener('input',commitBoardInput);
-boardField.addEventListener('change',commitBoardInput);
-el('insertBlank').addEventListener('click',insertBoardBlank);
+boardField.addEventListener('compositionend',()=>{boardComposing=false;commitBoardInput();scheduleSearch(220)});
+boardField.addEventListener('input',()=>{commitBoardInput();if(!boardComposing)scheduleSearch()});
+boardField.addEventListener('change',()=>{commitBoardInput();scheduleSearch(0)});
+el('insertBlank').addEventListener('click',()=>{insertBoardBlank();scheduleSearch(0)});
 updateBoardPresentation();
 function search(){
  const root=el('result');root.replaceChildren();
@@ -343,8 +356,6 @@ function search(){
  const deck=options();
  const handDeck=deck.filter(card=>activeHand.includes(card.id));
  const matched=[];
- // The reference dictionary searches the pattern even with no registered cards.
- // Cards only classify/filter the matched words; they must not determine dictionary existence.
  for(const word of words){
   const w=[...word];if(w.length!==pattern.length)continue;
   let ok=true,need=[];
@@ -378,12 +389,13 @@ function search(){
  }
  const mode=el('sortMode').value;
  const preferHand=el('preferHand').checked && activeHand.length>0;
- // Only compute the expensive heuristic for matched words, not the full 210k-entry dictionary.
  if(mode==='gimmick')for(const x of res)x.shape=gimmickShape(x.word);
+ if(mode==='combo')for(const x of res)x.combo=predictCombos(x.word);
  res.sort((a,b)=>{
   if(preferHand&&a.handPossible!==b.handPossible)return Number(b.handPossible)-Number(a.handPossible);
   if(a.buildable!==b.buildable)return Number(b.buildable)-Number(a.buildable);
-  if(mode==='gimmick')return b.shape.length-a.shape.length||b.shape.edge-a.shape.edge||a.word.localeCompare(b.word,'ja');
+  if(mode==='gimmick')return b.shape.length-a.shape.length||b.shape.edge-a.shape.edge||b.word.length-a.word.length||a.word.localeCompare(b.word,'ja');
+  if(mode==='combo')return (b.combo?.count||0)-(a.combo?.count||0)||b.word.length-a.word.length||a.word.localeCompare(b.word,'ja');
   return a.word.localeCompare(b.word,'ja');
  });
  if(preferHand){
@@ -393,10 +405,13 @@ function search(){
  }
  for(const obj of res.slice(0,300)){
   const shape=obj.shape||gimmickShape(obj.word);
+  const combo=obj.combo||predictCombos(obj.word);
   const row=document.createElement('div');row.className='word';
   if(obj.handPossible&&activeHand.length)row.classList.add('hand-first');
   const left=document.createElement('div'),head=document.createElement('div');head.className='result-main';
   const title=document.createElement('strong');title.textContent=obj.word;head.append(title);
+  const lenBadge=document.createElement('span');lenBadge.className='length-badge';lenBadge.textContent=`${[...obj.word].length}文字`;head.append(lenBadge);
+  const comboBadge=document.createElement('span');comboBadge.className='combo-count';comboBadge.textContent=`予想コンボ数 ${combo.count}`;head.append(comboBadge);
   const mark=document.createElement('span');mark.className=obj.buildable?'hand-first-label':'chip';
   mark.textContent=obj.buildable?'デッキで作れる':'辞書候補';head.append(mark);
   if(obj.handPossible&&activeHand.length){
@@ -408,6 +423,13 @@ function search(){
   }
   left.append(head);
   if(shape.split){const split=document.createElement('div');split.className='gimmick-split';split.textContent=`まとまり：${shape.split}`;left.append(split)}
+  if(combo.matches?.length){
+   const comboTerms=document.createElement('div');comboTerms.className='combo-terms';
+   const uniq=[];const seen=new Set();
+   for(const m of combo.matches){const key=`${m.word}@${m.start}-${m.end}`;if(seen.has(key))continue;seen.add(key);uniq.push(`${m.word}(${m.start}-${m.end})`);if(uniq.length>=8)break}
+   comboTerms.textContent='予想コンボ候補：'+uniq.join(' / ');
+   left.append(comboTerms);
+  }
   const chips=document.createElement('div');chips.className='chips';
   if(obj.assignment){
    for(const a of (obj.handPossible?obj.handAssignment:obj.assignment)){
@@ -423,7 +445,7 @@ function search(){
  }
  if(res.length>300){const p=document.createElement('p');p.className='hint';p.textContent='結果が多いため、上位300語を表示しています。';root.append(p)}
 }
-el('onlyDeck').onchange=search;el('preferHand').onchange=search;el('sortMode').onchange=search;el('search').onclick=search;el('reset').onclick=()=>{boardField.value='かい○○き';commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();commitBoardInput();search()}});
+el('onlyDeck').onchange=()=>search();el('preferHand').onchange=()=>search();el('sortMode').onchange=()=>search();el('search').onclick=()=>search();el('reset').onclick=()=>{boardField.value='かい○○き';commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();search()}});
 // Draft persistence is device-local, independent of named decks.
 const draftKey='kotodaman-dictionary-draft-v1';
 function persistDraft(){try{localStorage.setItem(draftKey,JSON.stringify({name:el('deckName').value,slots}));el('draftStatus').textContent='✓ この端末に入力内容を自動保存しました'}catch(e){el('draftStatus').textContent='端末に自動保存できません。JSON書き出しでバックアップしてください。'}}
