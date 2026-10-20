@@ -188,7 +188,7 @@
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2><div class="row"><button class="secondary" id="saveDeck">全員に保存</button><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><button class="secondary" id="clearHand" type="button">手札解除</button></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select><button id="loadDeck" class="secondary">呼び出す・編集</button><button id="deleteDeck" class="danger" hidden>削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラの「＋手札」を押して最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
 <section class="panel" id="searchPanel"><h2>② 盤面を入力して検索</h2>
 <p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
-<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="かい○○き" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="general-dict-controls"><label><input id="includeGeneralWords" type="checkbox" checked> 一般辞書の候補も表示</label><span id="generalWordsStatus">一般辞書：読み込み中</span><a href="dictionary-sources.html" target="_blank" rel="noopener">出典・注意事項</a></div><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
+<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="general-dict-controls"><label><input id="includeGeneralWords" type="checkbox" checked> 一般辞書の候補も表示</label><span id="generalWordsStatus">一般辞書：読み込み中</span><a href="dictionary-sources.html" target="_blank" rel="noopener">出典・注意事項</a></div><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
 <section class="panel" id="dictionaryPanel"><div class="head"><h2>③ ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">旧版の非公式辞書を利用します。公開版では同梱データを初回自動読み込みし、以降は端末内に保存した辞書を復元します。友人の端末でも最初に辞書を読み込んでください。iPhoneで自動取得に失敗する場合は、Web上に公開したURLから開くか、JSON / CSV / TXTを「ファイルを選ぶ」で読み込んでください。</p><div class="row"><button id="fetchDict">公開辞書を読み込む</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">ファイルを選ぶ<input id="file" type="file" accept=".json,.csv,.txt" hidden></label><button id="clearDict" class="secondary">辞書を解除</button></div><p id="status" class="hint" aria-live="polite"></p><div class="footer">公開データ候補：<a href="https://unpkg.com/@kotodaman-unofficial/dictionary/dist/words.json" target="_blank" rel="noopener">非公式辞書 JSON</a> / <a href="https://gaccag.com/kotodaman/dictionary/" target="_blank" rel="noopener">参考の辞書サイト</a>。これらは最新の全語を保証するものではありません。</div></section>
 <section class="panel" id="supplementPanel"><div class="head"><h2>辞書の不足語を補完</h2><span class="tab" id="extraBadge">追加 0語</span></div>
 <p class="hint">ゲーム内で成立を確認した言葉を登録できます。追加語は検索候補・部分語・予測コンボに反映され、この端末に保存されます。他の端末や友人へはTXTを書き出して渡せます。</p>
@@ -643,7 +643,12 @@ function updateBoardPresentation(){
 }
 let searchTimer=0;
 let mobileResultLimit=8;
+function invalidateSearchResults(){
+ const root=el('result');
+ if(root){root.replaceChildren();root.className='notice';root.textContent='盤面に合わせて検索中です…';}
+}
 function scheduleSearch(delay=180){
+ invalidateSearchResults();
  mobileResultLimit=8;
  clearTimeout(searchTimer);
  searchTimer=setTimeout(()=>search(),delay);
@@ -681,9 +686,9 @@ boardField.addEventListener('beforeinput',e=>{
   commitBoardInput();
  }
 });
-boardField.addEventListener('compositionstart',()=>{boardComposing=true});
+boardField.addEventListener('compositionstart',()=>{boardComposing=true;clearTimeout(searchTimer);invalidateSearchResults()});
 boardField.addEventListener('compositionend',()=>{boardComposing=false;commitBoardInput();scheduleSearch(220)});
-boardField.addEventListener('input',()=>{commitBoardInput();if(!boardComposing)scheduleSearch()});
+boardField.addEventListener('input',()=>{commitBoardInput();if(boardComposing){clearTimeout(searchTimer);invalidateSearchResults()}else scheduleSearch()});
 boardField.addEventListener('change',()=>{commitBoardInput();scheduleSearch(0)});
 el('insertBlank').addEventListener('click',()=>{insertBoardBlank();scheduleSearch(0)});
 updateBoardPresentation();
@@ -704,7 +709,7 @@ function search(){
    if(pattern[i]==='○')need.push({position:i+1,char:w[i]});
    else if(pattern[i]!==w[i]){ok=false;break}
   }
-  if(!ok)continue;
+  if(!ok || w.length!==pattern.length)continue;
   const assignment=deck.length?assign(need,deck):null;
   const handAssignment=handDeck.length?assign(need,handDeck):null;
   matched.push({word,need,assignment,handAssignment,handPossible:!!handAssignment,buildable:!!assignment,generalOnly:generalWordSet.has(word)});
@@ -745,7 +750,7 @@ function search(){
  }
  const mobileResults=window.matchMedia('(max-width:600px)').matches;
  const displayLimit=mobileResults?Math.min(300,mobileResultLimit):300;
- for(const obj of res.slice(0,displayLimit)){
+ for(const obj of res.filter(x=>[...x.word].length===pattern.length).slice(0,displayLimit)){
   const shape=obj.shape||gimmickShape(obj.word);
   const combo=obj.combo||predictCombos(obj.word);
   const row=document.createElement('div');row.className='word';
@@ -791,7 +796,7 @@ function search(){
  }
  if(res.length>300){const p=document.createElement('p');p.className='hint';p.textContent=mobileResults?'候補が多いため、最大300件まで表示できます。':'結果が多いため、上位300語を表示しています。';root.append(p)}
 }
-el('onlyDeck').onchange=()=>search();el('preferHand').onchange=()=>search();el('sortMode').onchange=()=>search();el('search').onclick=()=>search();el('reset').onclick=()=>{boardField.value='かい○○き';commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();search()}});
+el('onlyDeck').onchange=()=>search();el('preferHand').onchange=()=>search();el('sortMode').onchange=()=>search();el('search').onclick=()=>search();el('reset').onclick=()=>{clearTimeout(searchTimer);boardComposing=false;boardField.value='';mobileResultLimit=8;commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();search()}});
 // Draft persistence is device-local, independent of named decks.
 const draftKey='kotodaman-dictionary-draft-v1';
 function persistDraft(){try{localStorage.setItem(draftKey,JSON.stringify({name:el('deckName').value,slots}));el('draftStatus').textContent='✓ この端末に入力内容を自動保存しました'}catch(e){el('draftStatus').textContent='端末に自動保存できません。JSON書き出しでバックアップしてください。'}}
