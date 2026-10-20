@@ -563,11 +563,32 @@ drawDeck();listSaved();
   panel.append(wrapper);panel.classList.add('mobile-panel','mobile-collapsed');
   const toggle=document.createElement('button');toggle.type='button';toggle.className='mobile-panel-toggle';
   toggle.textContent='開く';toggle.setAttribute('aria-controls',wrapper.id);toggle.setAttribute('aria-label',label+'を開く');toggle.setAttribute('aria-expanded','false');
-  toggle.addEventListener('click',()=>{
+  const switchPanel=()=>{
    const collapsed=panel.classList.toggle('mobile-collapsed');
    toggle.textContent=collapsed?'開く':'閉じる';
    toggle.setAttribute('aria-label',label+(collapsed?'を開く':'を閉じる'));
    toggle.setAttribute('aria-expanded',String(!collapsed));
+  };
+  // Prevent Safari double-tap zoom only for this specific toggle.
+  let touchStart=null,ignoreClicksUntil=0;
+  toggle.addEventListener('touchstart',e=>{
+   if(e.touches.length!==1){touchStart=null;return}
+   touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  },{passive:true});
+  toggle.addEventListener('touchcancel',()=>{touchStart=null},{passive:true});
+  toggle.addEventListener('touchend',e=>{
+   const p=e.changedTouches[0];
+   const tap=touchStart&&p&&e.touches.length===0&&
+    Math.abs(p.clientX-touchStart.x)<12&&Math.abs(p.clientY-touchStart.y)<12;
+   touchStart=null;
+   if(!tap)return;
+   if(e.cancelable)e.preventDefault();
+   ignoreClicksUntil=performance.now()+550;
+   switchPanel();
+  },{passive:false});
+  toggle.addEventListener('click',e=>{
+   if(performance.now()<ignoreClicksUntil){e.preventDefault();return}
+   switchPanel(); // Keyboard and mouse clicks remain supported.
   });
   head.append(toggle);
  });
