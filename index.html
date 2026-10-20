@@ -109,8 +109,10 @@
  .desktop-image-picker:hover{background:#dbeafe!important}
  .desktop-image-picker:disabled{opacity:.6}
 }
+#cloudPanel .row{margin-top:9px}#cloudPanel select{min-width:220px;max-width:100%}#cloudPanel button{white-space:normal}@media(max-width:600px){#cloudPanel{padding:11px}#cloudPanel .row{gap:6px}#cloudPanel button{min-height:38px;padding:8px 10px;font-size:13px}#cloudPanel h2{font-size:17px}#cloudPanel select{flex:1 1 100%}}
 </style><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
+<section class="panel" id="cloudPanel"><div class="head"><h2>☁ デッキのクラウド保存・共有</h2></div><p class="hint">GoogleログインでWindowsとiPhoneのデッキを同期します。今までの端末内デッキは削除されません。初回は「既存のデッキをクラウドへコピー」を押してください。</p><div class="row"><button type="button" id="cloudLogin">Googleでログイン</button><button type="button" id="cloudLogout" class="secondary" hidden>ログアウト</button><span class="hint" id="cloudUser">未ログイン（端末内保存は利用できます）</span></div><div id="cloudControls" hidden><div class="row"><button type="button" id="cloudSave">編集中のデッキをクラウド保存</button><button type="button" id="cloudMigrate" class="secondary">既存のデッキをクラウドへコピー</button><button type="button" id="cloudRefresh" class="secondary">一覧を更新</button></div><div class="row"><select id="cloudDecks" aria-label="クラウド保存済みデッキ"><option value="">クラウドデッキを選択</option></select><button type="button" id="cloudLoad" class="secondary">読み込む</button><button type="button" id="cloudDelete" class="danger">クラウドから削除</button><button type="button" id="cloudShare" class="secondary">共有リンク発行</button></div></div><p id="cloudMessage" class="hint" aria-live="polite">クラウド機能を準備中です。</p><div id="cloudShared" hidden><p class="hint" id="cloudSharedInfo"></p><button id="cloudSharedCopy" type="button">共有デッキを自分の編集欄にコピー</button></div></section>
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">友人との共有：同じURLでそれぞれ利用できます。デッキを渡す場合は「共有リンクを作成」。自動同期ではありません。</div><div class="head"><h2>② 12体を登録・保存</h2><div class="row"><button class="secondary" id="saveDeck">デッキ保存</button><button class="secondary" id="shareLink">共有リンクを作成</button><button class="secondary" id="exportDeck">JSON書き出し</button><label style="background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650;cursor:pointer">復元<input id="importDeck" type="file" accept=".json" hidden></label></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">保存済みデッキを選択</option></select><button id="loadDeck" class="secondary">呼び出す</button><button id="deleteDeck" class="danger">削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="catalog-badge" id="catalogCount"></div><details style="margin:8px 0 16px"><summary style="cursor:pointer">キャラ情報を追加する（必要な場合のみ）</summary><p class="hint">下のボタンでGameWithの一覧を開き、ページを「名前を付けて保存」→「ウェブページ、HTMLのみ」で保存して、そのHTMLを読み込むと一覧から名前・文字を解析します。ページ構造によっては読み込めない場合があります。転載・配布せず、個人利用のデータとしてブラウザ内に保存します。</p><div class="row"><button class="secondary" id="openCatalog">キャラ一覧を開く</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px">保存したHTMLを取り込む<input id="catalogFile" type="file" accept=".html,.htm,.json,.csv,.txt" hidden></label><button class="danger" id="clearCatalog">追加データを消去</button></div><p id="catalogStatus" class="hint"></p></details><div id="deck" class="grid"></div></section>
 <section class="panel" id="handPanel"><div class="head"><h2>いまの手札・最大4体で作れることば</h2><button class="secondary" id="clearHand" type="button">手札を解除</button></div><p class="hint">下の12体デッキから、現在手札にある4体をタップして選んでください。選んだ手札のキャラだけで盤面の空欄を埋められる言葉を、検索結果の先頭に表示します。</p><div class="row"><span class="tab" id="handCount">0 / 4体</span><span id="handStatus" class="hint">まず12体を登録してください。</span></div><div id="handChoices" class="hand-choice"></div><div id="handLetters" class="hand-letters" style="display:none" aria-hidden="true"><span class="hint">4体を選ぶと文字を表示します。</span></div></section>
 <section class="panel" id="searchPanel"><h2>③ 盤面を入力して検索</h2>
@@ -676,6 +678,16 @@ el('clearHand').onclick=resetHand;
 try{if(location.hash.startsWith('#deck=')){const d=fromUrlPayload(location.hash.slice(6));acceptDeckData(d,false);el('draftStatus').textContent='共有リンクのデッキを読み込みました。「デッキ保存」で名前付き保存できます。';history.replaceState(null,'',location.pathname+location.search)}}catch(err){alert('共有リンクを読み込めませんでした：'+err.message)}
 
 drawDeck();listSaved();
+window.kotodamanCloudBridge={
+ getDraft(){return {name:el('deckName').value.trim()||'デッキ1',slots:slots.map(s=>({...s}))}},
+ getLocal(){return listSaved()},
+ applyDeck(deck){
+  if(!deck||!Array.isArray(deck.slots)||deck.slots.length!==12)throw Error('12体分のデッキではありません');
+  slots=deck.slots.map(normalizeSlotData);el('deckName').value=String(deck.name||'共有デッキ').slice(0,100);
+  activeHand=[];drawDeck();saveHand();persistDraft();search();
+  document.getElementById('deckPanel').scrollIntoView({behavior:'smooth',block:'start'});
+ }
+};
 // iPhone compact view: collapse setup/editing sections until they are needed.
 // The content is only visually collapsed in narrow view; desktop stays identical.
 (function setupMobileCompactPanels(){
@@ -734,4 +746,4 @@ drawDeck();listSaved();
  media.addEventListener?.('change',update);
  update();
 })();
-</script><script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script></body></html>
+</script><script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script><script type="module" src="./firebase-cloud.js"></script></body></html>
