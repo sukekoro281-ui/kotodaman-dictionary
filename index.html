@@ -105,9 +105,9 @@
 /* Windows/Desktop only. iPhone retains its existing deck layout. */
 @media (min-width:601px){
  .selected-character-img,.candidate-img,.hand-character-img{object-fit:contain;object-position:center;background:#f1f6fc}
- .desktop-image-picker{display:inline-flex;align-items:center;justify-content:center;min-height:27px!important;padding:4px 7px!important;margin-left:5px;margin-top:4px;background:#edf4ff!important;color:#2454a6!important;border:1px solid #d2e3ff;border-radius:6px;font-size:11px!important;font-weight:650;cursor:pointer;vertical-align:middle}
- .desktop-image-picker:hover{background:#dbeafe!important}
- .desktop-image-picker:disabled{opacity:.6}
+
+
+
 }
 #cloudPanel .row{margin-top:9px}#cloudPanel select{min-width:220px;max-width:100%}#cloudPanel button{white-space:normal}@media(max-width:600px){#cloudPanel{padding:11px}#cloudPanel .row{gap:6px}#cloudPanel button{min-height:38px;padding:8px 10px;font-size:13px}#cloudPanel h2{font-size:17px}#cloudPanel select{flex:1 1 100%}}
 
@@ -270,20 +270,6 @@ async function storeDesktopCharacterImage(item,file){
  try{localStorage.setItem(desktopImagesKey,JSON.stringify(desktopCharacterImages))}
  catch(e){if(before===undefined)delete desktopCharacterImages[key];else desktopCharacterImages[key]=before;throw Error('画像の保存容量が不足しています')}
 }
-function appendDesktopCharacterImagePicker(parent,item,rerender){
- if(!desktopImageMode()||!item)return;
- const button=document.createElement('button');button.type='button';button.className='desktop-image-picker';button.textContent='画像を設定';
- button.title='PC内のキャラクター画像をこの端末に保存します';
- const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp,image/gif,image/avif';input.hidden=true;
- button.addEventListener('click',()=>input.click());
- input.addEventListener('change',async()=>{
-  const file=input.files?.[0];if(!file)return;
-  button.disabled=true;button.textContent='保存中…';
-  try{await storeDesktopCharacterImage(item,file);rerender();}
-  catch(e){alert('画像を設定できませんでした：'+e.message);button.disabled=false;button.textContent='画像を設定'}
- });
- parent.append(button,input);
-}
 function normalizeSlotData(x){
  return {name:String(x?.name||'').slice(0,100),chars:String(x?.chars||'').slice(0,120),
  attribute:String(x?.attribute||''),image:String(x?.image||''),url:String(x?.url||''),version:String(x?.version||'')};
@@ -417,7 +403,7 @@ function setSelectedAttribute(node,name,attr,item){
  const details=document.createElement('span');details.className='selected-character-details';
  if(attr){const b=document.createElement('span');b.className='selected-attribute';b.dataset.attribute=attr;b.textContent=attr+'属性';details.append(b)}
  details.append(document.createTextNode('選択中：'+name));
- if(desktopImageMode())appendDesktopCharacterImagePicker(details,resolved||{name,attribute:attr},()=>setSelectedAttribute(node,name,attr,resolved));
+
  container.append(details);node.append(container);
 }
 function drawDeck(){el('deck').innerHTML='';slots.forEach((s,i)=>{const a=document.createElement('div');a.className='slot';const small=document.createElement('small');small.textContent=`${i+1}体目`;
