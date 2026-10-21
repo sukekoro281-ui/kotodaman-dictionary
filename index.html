@@ -203,7 +203,7 @@
 .wall-zone .hint{font-size:12px;line-height:1.5}
 .wall-description{font-size:12px;color:#5c6a80;line-height:1.55;margin:9px 0}
 @media(max-width:600px){.wall-controls{padding:9px 8px}.wall-position-grid{gap:3px}.wall-position{padding:4px 1px;min-height:51px}.wall-position .wall-char{font-size:18px}.wall-zones{grid-template-columns:minmax(0,1fr);gap:9px}.wall-zone{padding:10px}}
-</style><meta name="app-build" content="20261021-manual-wall-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
+</style><meta name="app-build" content="20261021-iphone-ocr-import-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2><div class="row"><button class="secondary" id="saveDeck">全員に保存</button><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><button class="secondary" id="clearHand" type="button">手札解除</button></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select><button id="loadDeck" class="secondary">呼び出す・編集</button><button id="deleteDeck" class="danger" hidden>削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラの「＋手札」を押して最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
@@ -981,6 +981,34 @@ readDraft();
 try{const h=JSON.parse(sessionStorage.getItem(handKey)||'[]');if(Array.isArray(h))activeHand=h.filter(Number.isInteger).slice(0,4)}catch(e){}
 el('clearHand').onclick=resetHand;
 try{if(location.hash.startsWith('#deck=')){const d=fromUrlPayload(location.hash.slice(6));acceptDeckData(d,false);el('draftStatus').textContent='共有リンクのデッキを読み込みました。「デッキ保存」で名前付き保存できます。';history.replaceState(null,'',location.pathname+location.search)}}catch(err){alert('共有リンクを読み込めませんでした：'+err.message)}
+
+// iPhone ショートカットからの盤面受け取り：画像・APIキーはURLに含めない。
+// ワーカーはひらがな・空欄だけを照合済みの7文字で返す。
+(function importBoardFromShortcut(){
+ const params=new URLSearchParams(location.search);
+ const value=params.get('ocr_board');
+ if(value===null)return;
+ // 一度読み込んだ盤面を戻る／リロード時に繰り返し適用しない。
+ params.delete('ocr_board');
+ const clean=location.pathname+(params.toString()?'?'+params.toString():'')+location.hash;
+ try{history.replaceState(history.state,'',clean)}catch(e){}
+ const chars=[...String(value).normalize('NFC')];
+ if(chars.length!==7||!chars.every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c))){
+  const status=document.getElementById('result');
+  if(status){status.className='notice';status.textContent='画像から受け取った盤面が不正です。手入力で修正してください。'}
+  return;
+ }
+ boardComposing=false;
+ boardField.value=chars.join('');
+ wallMode.checked=false;
+ wallCells.clear();
+ renderWallPositionButtons();
+ commitBoardInput();
+ mobileResultLimit=8;
+ clearTimeout(searchTimer);
+ // 辞書読み込み完了後は既存処理と監視で自動再検索される。
+ setTimeout(()=>{search();try{document.getElementById('searchPanel').scrollIntoView({block:'start'})}catch(e){}},60);
+})();
 
 drawDeck();listSaved();
 
