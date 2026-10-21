@@ -1015,11 +1015,11 @@ drawDeck();listSaved();
 window.kotodamanCloudBridge={
  getDraft(){return {name:el('deckName').value.trim()||'デッキ1',slots:slots.map(s=>({...s}))}},
  getLocal(){return listSaved()},
- applyDeck(deck){
+ applyDeck(deck, options={}){
   if(!deck||!Array.isArray(deck.slots)||deck.slots.length!==12)throw Error('12体分のデッキではありません');
   slots=deck.slots.map(normalizeSlotData);el('deckName').value=String(deck.name||'共有デッキ').slice(0,100);
   activeHand=[];drawDeck();saveHand();persistDraft();search();
-  document.getElementById('deckPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  if(options.scroll!==false)document.getElementById('deckPanel').scrollIntoView({behavior:'smooth',block:'start'});
  }
 };
 // iPhone compact view: collapse setup/editing sections until they are needed.
@@ -1085,4 +1085,4 @@ window.kotodamanCloudBridge={
  media.addEventListener?.('change',update);
  update();
 })();
-</script><script type="module" src="./public-decks.js?rollback=20261021-stable"></script></body></html>
+</script><script type="module" src="./public-decks.js?restore=20261021-stage1-validated"></script></body></html>
