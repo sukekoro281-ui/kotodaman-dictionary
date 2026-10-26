@@ -214,7 +214,7 @@
  <div class="wall-tip">ウォールがあるマスをタップしてください（複数選択可）。ウォールのマスは左右両方の言葉に含み、ウォールをまたぐ言葉は候補から除外します。</div>
  <div id="wallPositionGrid" class="wall-position-grid" role="group" aria-label="ウォールがあるマスを選択"></div>
  <div id="wallStatus" class="hint" aria-live="polite" style="margin-top:7px">ウォール位置を選択してください。</div>
-</div><div class="general-dict-controls"><label><input id="includeGeneralWords" type="checkbox" checked> 一般辞書の候補も表示</label><span id="generalWordsStatus">一般辞書：読み込み中</span><a href="dictionary-sources.html" target="_blank" rel="noopener">出典・注意事項</a></div><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
+</div><div class="general-dict-controls"><label><input id="includeGeneralWords" type="checkbox"> 一般辞書の候補も表示</label><span id="generalWordsStatus">一般辞書：読み込み中</span><a href="dictionary-sources.html" target="_blank" rel="noopener">出典・注意事項</a></div><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
 <section class="panel" id="dictionaryPanel"><div class="head"><h2>③ ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">旧版の非公式辞書を利用します。公開版では同梱データを初回自動読み込みし、以降は端末内に保存した辞書を復元します。友人の端末でも最初に辞書を読み込んでください。iPhoneで自動取得に失敗する場合は、Web上に公開したURLから開くか、JSON / CSV / TXTを「ファイルを選ぶ」で読み込んでください。</p><div class="row"><button id="fetchDict">公開辞書を読み込む</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">ファイルを選ぶ<input id="file" type="file" accept=".json,.csv,.txt" hidden></label><button id="clearDict" class="secondary">辞書を解除</button></div><p id="status" class="hint" aria-live="polite"></p><div class="footer">公開データ候補：<a href="https://unpkg.com/@kotodaman-unofficial/dictionary/dist/words.json" target="_blank" rel="noopener">非公式辞書 JSON</a> / <a href="https://gaccag.com/kotodaman/dictionary/" target="_blank" rel="noopener">参考の辞書サイト</a>。これらは最新の全語を保証するものではありません。</div></section>
 <section class="panel" id="supplementPanel"><div class="head"><h2>辞書の不足語を補完</h2><span class="tab" id="extraBadge">追加 0語</span></div>
 <p class="hint">ゲーム内で成立を確認した言葉を登録できます。追加語は検索候補・部分語・予測コンボに反映され、この端末に保存されます。他の端末や友人へはTXTを書き出して渡せます。</p>
@@ -470,6 +470,31 @@ const referenceVerifiedWords=['とうえいが','とうえいき','とうかい�
 // Two reported omissions are available immediately, even before the first JMdict refresh.
 // A general-language dictionary (or third-party site) does not prove game acceptance.
 const reportedMissingWords=['いこうき'];
+// 五文字の「形容詞の語幹＋さ」名詞の補完候補。
+// 日本語として成立する候補だが、各語のゲーム内収録は未確認。既存の確定語とは区別する。
+const adjectiveSaFiveCandidates=[
+ 'あたたかさ','あたらしさ','うつくしさ','おもしろさ',
+ 'むずかしさ','はずかしさ','すばらしさ','めずらしさ',
+ 'ありがたさ','たのもしさ','いとおしさ','ものたりなさ'
+].filter(word=>[...word].length===5);
+
+// 6・7文字の形容詞「～い」→名詞「～さ」の補完候補。
+// 日本語の語形として選定した語であり、ゲーム内の成立は一語ごとには未検証。
+const adjectiveSaSixSevenCandidates=[
+ 'あいくるしさ','あつかましさ','あつくるしさ','あつぼったさ','あぶらっこさ',
+ 'あまずっぱさ','あまったるさ','あらあらしさ','あわただしさ','いかがわしさ',
+ 'いがらっぽさ','いきぐるしさ','いそがわしさ','いたいたしさ','いちじるしさ',
+ 'いまいましさ','いらだたしさ','ういういしさ','うさんくささ','うしろめたさ',
+ 'うすぎたなさ','うたがわしさ','うっとうしさ','うやうやしさ','うらさびしさ',
+ 'うらやましさ','おくゆかしさ','おこがましさ','かたじけなさ','きたならしさ',
+ 'すがすがしさ','ずうずうしさ','はなはだしさ','ひとこいしさ','ほほえましさ',
+ 'まぎらわしさ','わずらわしさ',
+ 'あぶなっかしさ','あまっちょろさ','いやみたらしさ','うすきみわるさ','うたがいぶかさ',
+ 'うらはずかしさ','うらみがましさ','えんりょぶかさ','おしろいくささ','おもいがけなさ',
+ 'おりめただしさ','かんがいぶかさ','きそくただしさ','きょうみぶかさ','くちやかましさ',
+ 'けいさんだかさ','こころぐるしさ','こころさびしさ','こころもとなさ','こっぱずかしさ',
+].filter(word => [6,7].includes([...word].length));
+
 function indexDictionaryByLength(){
  wordsByLength=new Map();
  for(const word of words){
@@ -499,7 +524,7 @@ let extraWords=[];
 let publicVerifiedWords=[];
 try { const persisted=JSON.parse(localStorage.getItem(extraKey)||'[]'); if(Array.isArray(persisted))extraWords=parseWords(persisted); } catch(e) {}
 function rebuildDictionary(){
-  const primary=[...baseWords,...referenceVerifiedWords,...publicVerifiedWords,...extraWords];
+  const primary=[...baseWords,...referenceVerifiedWords,...publicVerifiedWords,...extraWords,...adjectiveSaFiveCandidates,...adjectiveSaSixSevenCandidates];
   gameWordSet=new Set(primary);
   generalWordSet=new Set([...reportedMissingWords,...generalWords].filter(w=>!gameWordSet.has(w)));
   const showGeneral=el('includeGeneralWords').checked;
@@ -507,7 +532,7 @@ function rebuildDictionary(){
   wordSet=new Set(words);
   indexDictionaryByLength();
   el('dictBadge').textContent=baseWords.length?`${words.length.toLocaleString()}語`:'未読み込み';
-  el('extraBadge').textContent=`追加 ${extraWords.length.toLocaleString()}語`;
+  el('extraBadge').textContent=`追加 ${extraWords.length.toLocaleString()}語 / 形容詞＋さ候補 ${adjectiveSaFiveCandidates.length+adjectiveSaSixSevenCandidates.length}語（ゲーム内未確認）`;
   el('extraList').textContent=extraWords.length?extraWords.join('、'):'登録なし';
   search();
 }
