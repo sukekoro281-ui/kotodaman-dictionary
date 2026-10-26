@@ -287,6 +287,16 @@
   /* Hide supplement UI without removing its dictionary initialization. */
   #supplementPanel{display:none!important}
 }
+
+/* iPhone Safari: editable deck fields must be >=16px to avoid focus auto-zoom.
+   Keep desktop and normal compact card labels unchanged. */
+@media (max-width: 767px) {
+  #deckPanel input[type="text"],
+  #deckPanel input:not([type]),
+  #deckPanel select,
+  #deckPanel .slot input,
+  #deckPanel .slot input.letters { font-size: 16px !important; }
+}
 </style><meta name="app-build" content="20261026-wordmaster-merged-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
