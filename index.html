@@ -203,6 +203,19 @@
 .wall-zone .hint{font-size:12px;line-height:1.5}
 .wall-description{font-size:12px;color:#5c6a80;line-height:1.55;margin:9px 0}
 @media(max-width:600px){.wall-controls{padding:9px 8px}.wall-position-grid{gap:3px}.wall-position{padding:4px 1px;min-height:51px}.wall-position .wall-char{font-size:18px}.wall-zones{grid-template-columns:minmax(0,1fr);gap:9px}.wall-zone{padding:10px}}
+
+/* Integrated dictionary: keep the DOM status references for JavaScript, but hide its setup panel. */
+#dictionaryPanel{display:none!important}
+#searchPanel #status{font-size:12px;margin:5px 0;color:#66758b}
+/* Optional manual words: collapsed by default on desktop and mobile. */
+#supplementPanel{display:block!important}
+#supplementPanel details.manual-words>summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:16px;font-weight:700;list-style:none}
+#supplementPanel details.manual-words>summary::-webkit-details-marker{display:none}
+#supplementPanel details.manual-words>summary::before{content:'▸';color:#2563eb;flex:none}
+#supplementPanel details.manual-words[open]>summary::before{content:'▾'}
+#supplementPanel .manual-words-content{padding-top:12px}
+#supplementPanel .manual-words #extraBadge{font-size:11px;margin-left:auto}
+@media(max-width:600px){#supplementPanel{display:block!important}#supplementPanel details.manual-words>summary{font-size:14px}}
 </style><meta name="app-build" content="20261026-wordmaster-merged-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
@@ -214,14 +227,14 @@
  <div class="wall-tip">ウォールがあるマスをタップしてください（複数選択可）。ウォールのマスは左右両方の言葉に含み、ウォールをまたぐ言葉は候補から除外します。</div>
  <div id="wallPositionGrid" class="wall-position-grid" role="group" aria-label="ウォールがあるマスを選択"></div>
  <div id="wallStatus" class="hint" aria-live="polite" style="margin-top:7px">ウォール位置を選択してください。</div>
-</div><p class="hint" id="mergedWordStatus">ゲーム内WordMaster統合辞書を自動読み込みします（一般辞書なし）。</p><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
-<section class="panel" id="dictionaryPanel"><div class="head"><h2>③ ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">WordMaster由来の読みを統合した辞書を自動で読み込みます。一般辞書（JMdict）を使いません。ゲームデータへの収録と実際の成立は完全には同義とは限りません。</p><p id="status" class="hint" aria-live="polite">統合辞書を読み込み中…</p></section>
-<section class="panel" id="supplementPanel"><div class="head"><h2>辞書の不足語を補完</h2><span class="tab" id="extraBadge">追加 0語</span></div>
+</div><p class="hint" id="mergedWordStatus">ゲーム内WordMaster統合辞書を自動読み込みします（一般辞書なし）。</p><p id="status" class="hint" aria-live="polite">統合辞書を読み込み中…</p><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
+<section class="panel" id="dictionaryPanel"><div class="head"><h2>③ ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">WordMaster由来の読みを統合した辞書を自動で読み込みます。一般辞書（JMdict）を使いません。ゲームデータへの収録と実際の成立は完全には同義とは限りません。</p></section>
+<section class="panel" id="supplementPanel"><details class="manual-words"><summary>辞書の不足語を補完 <span class="tab" id="extraBadge">追加 0語</span></summary><div class="manual-words-content">
 <p class="hint">ゲーム内で成立を確認した言葉を登録できます。追加語は検索候補・部分語・予測コンボに反映され、この端末に保存されます。他の端末や友人へはTXTを書き出して渡せます。</p>
 <div class="row"><input id="extraInput" type="text" placeholder="例：いこうき、いとうき" aria-label="追加したい言葉" style="flex:1;min-width:180px"><button id="addExtra" type="button">単語を追加</button></div>
 <div class="row"><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">TXT / CSVを取り込む<input type="file" id="importExtra" accept=".txt,.csv,.json" hidden></label><button class="secondary" type="button" id="exportExtra">補完辞書を保存・共有</button><button class="secondary" type="button" id="clearExtra">追加語を全削除</button></div>
 <p id="extraStatus" class="hint" aria-live="polite"></p><details><summary>登録済みの追加語を表示</summary><p id="extraList" class="hint">登録なし</p></details>
-</section>
+</div></details></section>
 
 <div class="footer">登録デッキはこのブラウザ内に保存されます。辞書は端末内へのキャッシュを試みます（Safariのストレージ削除などで失われる場合があります）。このHTMLは単体で動きます。キャラの属性は色分け表示します。キャラ画像は登録済みの外部画像URLから表示します。画像が読み込めない場合は属性表示に切り替わります。スクショからのキャラ自動認識は未実装です。</div></main><script>
 const boardField=document.getElementById('board');let boardComposing=false;let lastSearchedBoard=null;let wallMode;
