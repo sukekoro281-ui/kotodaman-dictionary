@@ -269,13 +269,31 @@
 
 /* Hide redundant deck guidance and catalog/status captions; IDs remain for existing scripts. */
 #deckPanel .deck-info-line, #deckPanel #publicDeckStatus {display:none!important}
+
+/* iPhone-only: compact deck cards, fixed combo sort and no explanatory clutter.
+   Desktop presentation and underlying controls remain untouched. */
+@media (max-width:600px){
+  /* Label and hidden +hand control belong only to the old card layout.
+     Card body remains one large hand-select target. */
+  #deckPanel .slot:not(.deck-edit-mode) .slot-bar{display:none!important}
+  #deckPanel .slot .slot-bar{display:none!important}
+  #deckPanel .slot .selected-character{margin-top:1px}
+  /* Board guidance is not needed on iPhone. */
+  #searchPanel>h2+p.hint{display:none!important}
+  /* Sorting is locked to highest predicted combos, then gojuon. */
+  #searchPanel .iphone-sort-controls{display:none!important}
+  /* Keep wall selection UI, remove only its explanatory prose. */
+  #searchPanel .wall-tip,#searchPanel .wall-description{display:none!important}
+  /* Hide supplement UI without removing its dictionary initialization. */
+  #supplementPanel{display:none!important}
+}
 </style><meta name="app-build" content="20261026-wordmaster-merged-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2></div><div class="deck-top-layout"><div class="deck-fields"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select></div><div class="deck-actions" aria-label="デッキ操作"><div class="deck-action-row deck-action-primary"><button id="loadDeck" class="secondary" type="button">共有デッキを編集</button><div class="deck-action-group"><button class="secondary" id="saveDeck">全員に保存</button><button id="deleteDeck" class="danger" type="button">削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div></div><div class="deck-action-row deck-action-secondary"><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><div class="deck-action-group"><button class="secondary" id="clearHand" type="button">手札解除</button><button id="deckEditMode" class="secondary" type="button">カード編集</button></div></div></div></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラのカードをタップして最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
 <section class="panel" id="searchPanel"><h2>② 盤面を入力して検索</h2>
 <p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
-<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="row" style="margin:9px 0 0"><label class="switch"><input id="wallMode" type="checkbox"> ウォールあり（位置を手動指定）</label></div>
+<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch iphone-sort-controls">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="row" style="margin:9px 0 0"><label class="switch"><input id="wallMode" type="checkbox"> ウォールあり（位置を手動指定）</label></div>
 <div id="wallControls" class="wall-controls" hidden>
  <div class="wall-tip">ウォールがあるマスをタップしてください（複数選択可）。ウォールのマスは左右両方の言葉に含み、ウォールをまたぐ言葉は候補から除外します。</div>
  <div id="wallPositionGrid" class="wall-position-grid" role="group" aria-label="ウォールがあるマスを選択"></div>
@@ -874,7 +892,7 @@ function searchWall(pattern,root){
  const handDeck=deck.filter(card=>activeHand.includes(card.id));
  const preferHand=el('preferHand').checked&&activeHand.length>0;
  const onlyDeck=el('onlyDeck').checked;
- const sortMode=el('sortMode').value;
+ const sortMode=window.matchMedia('(max-width:600px)').matches?'combo':el('sortMode').value;
  const zones=makeWallZones(pattern);
  const description=document.createElement('p');description.className='wall-description';
  description.textContent='ウォールをまたがない範囲ごとの候補です。ウォールのマスは両側に含みます。コンボ数は各区間の参考値で、全盤面の合計コンボ数ではありません。';
@@ -963,7 +981,7 @@ function search(){
   note.textContent=onlyDeck?(deck.length?'辞書には候補があっても、現在のデッキでは空欄を埋められません。絞り込みを解除すると候補を確認できます。':'デッキが未登録です。絞り込みを解除すると辞書の候補を確認できます。'):'この盤面に一致する単語は現在の辞書にありません。外部辞書と収録語が異なる場合があります。';
   root.append(note);return;
  }
- const mode=el('sortMode').value;
+ const mode=window.matchMedia('(max-width:600px)').matches?'combo':el('sortMode').value;
  const preferHand=el('preferHand').checked && activeHand.length>0;
  // Displayed predicted combo count is the primary sort key.
  for(const x of res)x.combo=predictCombos(x.word);
