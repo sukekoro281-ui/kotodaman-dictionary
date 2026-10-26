@@ -214,6 +214,13 @@
  <div class="wall-tip">ウォールがあるマスをタップしてください（複数選択可）。ウォールのマスは左右両方の言葉に含み、ウォールをまたぐ言葉は候補から除外します。</div>
  <div id="wallPositionGrid" class="wall-position-grid" role="group" aria-label="ウォールがあるマスを選択"></div>
  <div id="wallStatus" class="hint" aria-live="polite" style="margin-top:7px">ウォール位置を選択してください。</div>
+</div><div id="wordMasterPanel" style="margin:11px 0 6px;padding:10px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:10px;font-size:13px;color:#23466e">
+ <div style="font-weight:750;margin-bottom:6px">ゲーム内WordMasterの単語（端末内で追加）</div>
+ <label style="display:inline-block;padding:8px 11px;background:#dbeafe;border-radius:8px;cursor:pointer;color:#1e40af;font-weight:700">単語TXTを取り込む<input type="file" id="wordMasterImport" accept=".txt,text/plain" hidden></label>
+ <button type="button" id="wordMasterClear" class="secondary" style="padding:8px 11px;margin-left:6px">WordMasterを解除</button>
+ <label style="margin:7px 0 0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="wordMasterEnabled" checked> WordMasterの単語を検索に含める</label>
+ <div id="wordMasterStatus" role="status" aria-live="polite" style="margin-top:5px;font-size:12px">未読み込み。読み込んだデータはこの端末に保存します。</div>
+ <div style="margin-top:4px;font-size:11px;color:#64748b">ゲーム内データの収録と成立は完全には同義ではありません。インポートしたTXTは共有デッキやFirebaseに送信しません。</div>
 </div><div class="general-dict-controls"><label><input id="includeGeneralWords" type="checkbox"> 一般辞書の候補も表示</label><span id="generalWordsStatus">一般辞書：読み込み中</span><a href="dictionary-sources.html" target="_blank" rel="noopener">出典・注意事項</a></div><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
 <section class="panel" id="dictionaryPanel"><div class="head"><h2>③ ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">旧版の非公式辞書を利用します。公開版では同梱データを初回自動読み込みし、以降は端末内に保存した辞書を復元します。友人の端末でも最初に辞書を読み込んでください。iPhoneで自動取得に失敗する場合は、Web上に公開したURLから開くか、JSON / CSV / TXTを「ファイルを選ぶ」で読み込んでください。</p><div class="row"><button id="fetchDict">公開辞書を読み込む</button><label class="secondary" style="cursor:pointer;background:#e9eef7;color:#30425e;padding:11px 15px;border-radius:10px;font-weight:650">ファイルを選ぶ<input id="file" type="file" accept=".json,.csv,.txt" hidden></label><button id="clearDict" class="secondary">辞書を解除</button></div><p id="status" class="hint" aria-live="polite"></p><div class="footer">公開データ候補：<a href="https://unpkg.com/@kotodaman-unofficial/dictionary/dist/words.json" target="_blank" rel="noopener">非公式辞書 JSON</a> / <a href="https://gaccag.com/kotodaman/dictionary/" target="_blank" rel="noopener">参考の辞書サイト</a>。これらは最新の全語を保証するものではありません。</div></section>
 <section class="panel" id="supplementPanel"><div class="head"><h2>辞書の不足語を補完</h2><span class="tab" id="extraBadge">追加 0語</span></div>
@@ -518,20 +525,72 @@ async function loadGeneralDictionary(){
  rebuildDictionary();
 }
 
+// WordMaster is optional per-device private vocabulary. It is NEVER sent to cloud storage.
+const wmCacheKey='private-wordmaster-v1', wmEnabledKey='private-wordmaster-enabled-v1';
+let wordMasterWords=[];
+function wmStatus(message){const target=el('wordMasterStatus');if(target)target.textContent=message;}
+function wmEnabled(){return !!el('wordMasterEnabled')?.checked;}
+function loadWordMasterWords(lines){
+ const unique=parseWords(lines);
+ if(unique.length<1000)throw Error('単語が少なすぎます。unique_readings.txt を選択してください。');
+ wordMasterWords=unique;
+ wmStatus(`WordMaster：${unique.length.toLocaleString()}種類の読みを読み込み済み（この端末のみ）`);
+ rebuildDictionary();
+ return unique;
+}
+async function wmStorage(action,payload){
+ const db=await dictionaryDB();
+ return new Promise((resolve,reject)=>{
+   const tx=db.transaction('cache',action==='get'?'readonly':'readwrite');
+   const store=tx.objectStore('cache');
+   const req=action==='get'?store.get(wmCacheKey):action==='delete'?store.delete(wmCacheKey):store.put(payload,wmCacheKey);
+   req.onsuccess=()=>resolve(req.result);
+   req.onerror=()=>reject(req.error);
+   tx.oncomplete=()=>db.close();
+   tx.onerror=()=>{db.close();reject(tx.error)};
+ });
+}
+async function restoreWordMaster(){
+ try{
+   const data=await wmStorage('get');
+   if(Array.isArray(data)&&data.length){wordMasterWords=parseWords(data);wmStatus(`WordMaster：${wordMasterWords.length.toLocaleString()}種類の読みを復元しました（この端末のみ）`);rebuildDictionary()}
+ }catch(err){console.warn('WordMaster cache not restored:',err)}
+}
+try{el('wordMasterEnabled').checked=localStorage.getItem(wmEnabledKey)!=='false'}catch(e){}
+el('wordMasterEnabled').addEventListener('change',()=>{try{localStorage.setItem(wmEnabledKey,String(wmEnabled()))}catch(e){}rebuildDictionary()});
+el('wordMasterImport').addEventListener('change',async event=>{
+ const file=event.target.files?.[0];if(!file)return;
+ wmStatus('WordMasterを読み込み・検証中…');
+ try{
+   if(file.size>25*1024*1024)throw Error('ファイルが大きすぎます。読みのTXTを指定してください。');
+   const contents=await file.text();
+   const parsed=loadWordMasterWords(contents.split(/\r?\n/));
+   try{await wmStorage('put',parsed)}catch(err){wmStatus(`WordMaster：${parsed.length.toLocaleString()}語を読み込みましたが、端末への保存に失敗しました。次回再読み込みが必要です。`)}
+ }catch(error){wmStatus('読み込みに失敗：'+error.message)}
+ finally{event.target.value=''}
+});
+el('wordMasterClear').addEventListener('click',async()=>{
+ if(!wordMasterWords.length)return;
+ if(!confirm('この端末に保存したWordMaster語彙を解除しますか？ 共有デッキ・通常辞書は変更されません。'))return;
+ wordMasterWords=[];rebuildDictionary();wmStatus('WordMasterを解除しました。');
+ try{await wmStorage('delete')}catch(error){wmStatus('検索から解除しましたが、保存データの削除に失敗：'+error.message)}
+});
+restoreWordMaster();
+
 // The public dictionary and the user-confirmed supplement are independent.
 const extraKey='kotodaman-extra-words-v1';
 let extraWords=[];
 let publicVerifiedWords=[];
 try { const persisted=JSON.parse(localStorage.getItem(extraKey)||'[]'); if(Array.isArray(persisted))extraWords=parseWords(persisted); } catch(e) {}
 function rebuildDictionary(){
-  const primary=[...baseWords,...referenceVerifiedWords,...publicVerifiedWords,...extraWords,...adjectiveSaFiveCandidates,...adjectiveSaSixSevenCandidates];
+  const primary=[...baseWords,...referenceVerifiedWords,...publicVerifiedWords,...extraWords,...adjectiveSaFiveCandidates,...adjectiveSaSixSevenCandidates,...(wmEnabled()?wordMasterWords:[])];
   gameWordSet=new Set(primary);
   generalWordSet=new Set([...reportedMissingWords,...generalWords].filter(w=>!gameWordSet.has(w)));
   const showGeneral=el('includeGeneralWords').checked;
   words=[...new Set([...primary,...(showGeneral?generalWordSet:[])])];
   wordSet=new Set(words);
   indexDictionaryByLength();
-  el('dictBadge').textContent=baseWords.length?`${words.length.toLocaleString()}語`:'未読み込み';
+  el('dictBadge').textContent=words.length?`${words.length.toLocaleString()}語`:'未読み込み';
   el('extraBadge').textContent=`追加 ${extraWords.length.toLocaleString()}語 / 形容詞＋さ候補 ${adjectiveSaFiveCandidates.length+adjectiveSaSixSevenCandidates.length}語（ゲーム内未確認）`;
   el('extraList').textContent=extraWords.length?extraWords.join('、'):'登録なし';
   search();
@@ -878,7 +937,7 @@ function search(){
  const pattern=boardPattern(boardField.value);
  lastSearchedBoard=pattern.join('');
  root.dataset.searchedBoard=lastSearchedBoard;
- if(!baseWords.length&&!extraWords.length){root.className='notice';root.textContent='辞書を読み込み中です。読み込めない場合は「公開辞書を読み込む」を押してください。';return}
+ if(!words.length){root.className='notice';root.textContent='辞書を読み込み中です。読み込めない場合は「公開辞書を読み込む」を押してください。';return}
  if(!pattern.length){root.className='notice';root.textContent='盤面を入力してください。';return}
  if(!pattern.every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c))){root.className='notice';root.textContent='ひらがなと「○」で盤面を入力してください。';return}
  if(wallMode&&wallMode.checked){searchWall(pattern,root);return;}
