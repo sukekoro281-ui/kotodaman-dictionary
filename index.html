@@ -216,10 +216,29 @@
 #supplementPanel .manual-words-content{padding-top:12px}
 #supplementPanel .manual-words #extraBadge{font-size:11px;margin-left:auto}
 @media(max-width:600px){#supplementPanel{display:block!important}#supplementPanel details.manual-words>summary{font-size:14px}}
+
+/* Compact, non-editable hand selection for both desktop and iPhone. */
+#deckPanel:not(.deck-edit-mode) .slot{padding:9px;min-height:80px;cursor:pointer;touch-action:manipulation}
+#deckPanel:not(.deck-edit-mode) .slot .slot-name-input,
+#deckPanel:not(.deck-edit-mode) .slot .slot-letters-input,
+#deckPanel:not(.deck-edit-mode) .slot .slot-selected-details,
+#deckPanel:not(.deck-edit-mode) .slot .search-results{display:none!important}
+#deckPanel .slot-compact{display:none}
+#deckPanel:not(.deck-edit-mode) .slot-compact{display:flex;align-items:center;gap:8px;min-width:0;min-height:43px}
+#deckPanel .slot-compact-img{flex:none;display:flex;align-items:center;justify-content:center}
+#deckPanel .slot-compact-img .selected-character-img,
+#deckPanel .slot-compact-img .attribute-icon{width:46px;height:46px;object-fit:contain}
+#deckPanel .slot-compact-title{font-size:13px;font-weight:700;line-height:1.35;overflow-wrap:anywhere;min-width:0}
+#deckPanel .slot-compact-attribute{font-size:11px;color:#586b84;margin-top:3px}
+#deckPanel:not(.deck-edit-mode) .slot .slot-hand-button{pointer-events:none}
+#deckPanel.deck-edit-mode .slot-compact{display:none}
+#deckPanel .slot:focus-visible{outline:3px solid #7fb8ff;outline-offset:2px}
+#deckEditMode{font-size:12px;min-height:34px;padding:7px 10px}
+@media(max-width:600px){#deckPanel:not(.deck-edit-mode) .slot{padding:6px;min-height:68px}#deckPanel .slot-compact-img .selected-character-img,#deckPanel .slot-compact-img .attribute-icon{width:36px;height:36px}#deckPanel .slot-compact-title{font-size:12px}#deckPanel .slot-compact-attribute{font-size:10px}}
 </style><meta name="app-build" content="20261026-wordmaster-merged-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
-<section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2><div class="row"><button class="secondary" id="saveDeck">全員に保存</button><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><button class="secondary" id="clearHand" type="button">手札解除</button></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select><button id="loadDeck" class="secondary" type="button">編集</button><button id="deleteDeck" class="danger" type="button">削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラの「＋手札」を押して最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
+<section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2><div class="row"><button class="secondary" id="saveDeck">全員に保存</button><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><button class="secondary" id="clearHand" type="button">手札解除</button></div></div><div class="row" style="margin-bottom:12px"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select><button id="loadDeck" class="secondary" type="button">共有デッキを編集</button><button id="deckEditMode" class="secondary" type="button">カード編集</button><button id="deleteDeck" class="danger" type="button">削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラの「＋手札」を押して最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
 <section class="panel" id="searchPanel"><h2>② 盤面を入力して検索</h2>
 <p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
 <div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="row" style="margin:9px 0 0"><label class="switch"><input id="wallMode" type="checkbox"> ウォールあり（位置を手動指定）</label></div>
@@ -458,11 +477,23 @@ function drawDeck(){el('deck').innerHTML='';slots.forEach((s,i)=>{const a=docume
  const pick=document.createElement('button');pick.type='button';pick.className='slot-hand-button';
  pick.dataset.handSlot=String(i);pick.addEventListener('click',()=>toggleHandSlot(i));
  bar.append(small,pick);
- const n=document.createElement('input');n.placeholder='キャラ名・ローマ字で検索（例：setsuri）';n.value=s.name||'';n.setAttribute('autocomplete','off');const matches=document.createElement('div');matches.className='search-results';matches.hidden=true;const selected=document.createElement('div');selected.className='selected';const c=document.createElement('input');c.className='letters';c.placeholder='使用文字（候補選択で自動入力）';c.value=s.chars||'';
+ const n=document.createElement('input');n.classList.add('slot-name-input');n.placeholder='キャラ名・ローマ字で検索（例：setsuri）';n.value=s.name||'';n.setAttribute('autocomplete','off');const matches=document.createElement('div');matches.className='search-results';matches.hidden=true;const selected=document.createElement('div');selected.className='selected slot-selected-details';const c=document.createElement('input');c.className='letters slot-letters-input';c.placeholder='使用文字（候補選択で自動入力）';c.value=s.chars||'';
 
 function showMatches(){let q=nameKey(n.value||'');matches.innerHTML='';if(!q){matches.hidden=true;return}let hits=catalog().filter(x=>charMatches(x,q)).slice(0,60);if(!hits.length){matches.hidden=true;selected.textContent='候補なし。名前や表記を確認してください。';return}for(let item of hits){let b=document.createElement('button');b.type='button';b.className='candidate';attachCandidateImage(b,item);let copy=document.createElement('span');copy.className='candidate-copy';let title=document.createElement('span');title.className='candidate-title';title.textContent=`${item.name}${item.version?' '+item.version:''}［${item.attribute}］`;let meta=document.createElement('span');meta.className='candidate-meta';meta.textContent=`${item.description&&item.description!==item.name?' '+item.description.split('・')[0]+' ／ ':''}使用文字：${item.letters.join('・')}`;copy.append(title,meta);b.append(copy);b.onclick=()=>{slots[i]=normalizeSlotData({name:item.name,chars:item.letters.join(','),attribute:item.attribute,image:item.image,url:item.url,version:item.version});n.value=item.name;c.value=slots[i].chars;setSelectedAttribute(selected,item.name,item.attribute,item);matches.hidden=true;persistDraft();renderHand();search();};matches.append(b)}matches.hidden=false}
-n.addEventListener('input',e=>{slots[i].name=e.target.value;slots[i].attribute='';slots[i].image='';slots[i].url='';slots[i].version='';selected.replaceChildren();persistDraft();renderHand();showMatches()});n.addEventListener('focus',showMatches);c.addEventListener('input',e=>{slots[i].chars=e.target.value;persistDraft();renderHand();search()});setSelectedAttribute(selected,s.name,s.attribute,resolveSlotImage(s));a.append(bar,n,matches,selected,c);
+n.addEventListener('input',e=>{slots[i].name=e.target.value;slots[i].attribute='';slots[i].image='';slots[i].url='';slots[i].version='';selected.replaceChildren();persistDraft();renderHand();showMatches()});n.addEventListener('focus',showMatches);c.addEventListener('input',e=>{slots[i].chars=e.target.value;persistDraft();renderHand();search()});setSelectedAttribute(selected,s.name,s.attribute,resolveSlotImage(s));
+ const compact=document.createElement('div');compact.className='slot-compact';
+ const iconWrap=document.createElement('span');iconWrap.className='slot-compact-img';
+ const resolved=resolveSlotImage(s);
+ iconWrap.append(resolved?characterThumb(resolved,'selected-character-img'):attributeMarker(s));
+ const info=document.createElement('div');info.style.minWidth='0';
+ const title=document.createElement('div');title.className='slot-compact-title';title.textContent=s.name||'未登録';
+ const attr=document.createElement('div');attr.className='slot-compact-attribute';attr.textContent=s.attribute?s.attribute+'属性':'';
+ info.append(title,attr);compact.append(iconWrap,info);
+ a.setAttribute('role','button');a.tabIndex=0;a.setAttribute('aria-label',`${i+1}体目 ${s.name||'未登録'}：手札を切り替え`);
+ a.addEventListener('keydown',e=>{if(el('deckPanel').classList.contains('deck-edit-mode'))return;if(e.target!==a)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleHandSlot(i)}});
+ a.append(bar,compact,n,matches,selected,c);
  a.addEventListener('click',e=>{
+  if(el('deckPanel').classList.contains('deck-edit-mode'))return;
   if(e.target.closest('button,input,select,label,a,.search-results'))return;
   toggleHandSlot(i);
  });
@@ -1021,6 +1052,14 @@ try{if(location.hash.startsWith('#deck=')){const d=fromUrlPayload(location.hash.
 })();
 
 drawDeck();listSaved();
+// Existing sharing, draft and OCR logic are deliberately untouched.
+(function setupDeckEditMode(){
+ const panel=el('deckPanel'),button=el('deckEditMode');
+ function setMode(edit){panel.classList.toggle('deck-edit-mode',edit);button.textContent=edit?'編集を終了':'カード編集';button.setAttribute('aria-pressed',String(edit));if(!edit)drawDeck()}
+ button.addEventListener('click',()=>setMode(!panel.classList.contains('deck-edit-mode')));
+ // The existing "edit shared deck" action should also reveal the edit controls.
+ el('loadDeck').addEventListener('click',()=>setMode(true));
+})();
 
 window.kotodamanCloudBridge={
  getDraft(){return {name:el('deckName').value.trim()||'デッキ1',slots:slots.map(s=>({...s}))}},
