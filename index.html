@@ -297,6 +297,28 @@
   #deckPanel .slot input,
   #deckPanel .slot input.letters { font-size: 16px !important; }
 }
+
+/* iPhone Safari: prevent focus auto-zoom on editable fields.
+   Apply after all earlier slot-input rules; preserve user pinch zoom. */
+@media (max-width:767px) {
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  #deckPanel.deck-edit-mode input:not([type="checkbox"]):not([type="radio"]),
+  #deckPanel.deck-edit-mode textarea,
+  #deckPanel.deck-edit-mode select,
+  #deckPanel #deckName,
+  #deckPanel #savedDecks {
+    font-size: 18px !important;
+    line-height: 1.35 !important;
+    max-width: 100%;
+    min-width: 0;
+  }
+  #deckPanel.deck-edit-mode .slot,
+  #deckPanel.deck-edit-mode .slot input,
+  #deckPanel.deck-edit-mode .slot .search-results,
+  #deckPanel .deck-fields { min-width: 0; max-width: 100%; }
+  #deckPanel.deck-edit-mode .slot input { width: 100%; }
+  #deckPanel.deck-edit-mode .grid { min-width: 0; }
+}
 </style><meta name="app-build" content="20261026-wordmaster-merged-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div>
 
 
