@@ -319,13 +319,24 @@
   #deckPanel.deck-edit-mode .slot input { width: 100%; }
   #deckPanel.deck-edit-mode .grid { min-width: 0; }
 }
+
+/* Recent board searches: a single compact horizontally scrollable row on iPhone. */
+.search-history{display:flex;align-items:center;gap:7px;margin:8px 0 3px;min-width:0}
+.search-history[hidden]{display:none!important}
+.search-history-title{flex:none;font-size:12px;color:#60738c;font-weight:700;white-space:nowrap}
+.search-history-list{display:flex;align-items:center;gap:6px;min-width:0;flex:1;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding:2px 0 5px}
+.search-history-item{flex:none;min-height:32px;padding:5px 10px;border:1px solid #c7d9f6;border-radius:9px;background:#eef5ff;color:#2456a2;font-size:13px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.search-history-item.is-current{background:#dbeafe;border-color:#78a9f5;color:#174ba5}
+.search-history-clear{flex:none;min-height:32px;padding:5px 8px;border-radius:8px;background:#eef0f4;color:#566579;font-size:11px;font-weight:600;white-space:nowrap}
+@media(max-width:600px){.search-history{gap:5px;margin:5px 0 2px}.search-history-title{font-size:11px}.search-history-item{font-size:12px;min-height:32px;padding:5px 8px}.search-history-clear{font-size:11px;min-height:32px;padding:5px 7px}}
 </style><meta name="app-build" content="20261026-wordmaster-merged-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div> <a href="update-history.html" style="display:inline-flex;align-items:center;gap:4px;margin:6px 0 0;color:#2563eb;font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px">更新履歴を見る</a>
 
 
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2></div><div class="deck-top-layout"><div class="deck-fields"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select></div><div class="deck-actions" aria-label="デッキ操作"><div class="deck-action-row deck-action-primary"><button id="loadDeck" class="secondary" type="button">共有デッキを編集</button><div class="deck-action-group"><button class="secondary" id="saveDeck">全員に保存</button><button id="deleteDeck" class="danger" type="button">削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div></div><div class="deck-action-row deck-action-secondary"><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><div class="deck-action-group"><button class="secondary" id="clearHand" type="button">手札解除</button><button id="deckEditMode" class="secondary" type="button">カード編集</button></div></div></div></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラのカードをタップして最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
 <section class="panel" id="searchPanel"><h2>② 盤面を入力して検索</h2>
 <p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
-<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch iphone-sort-controls">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div class="row" style="margin:9px 0 0"><label class="switch"><input id="wallMode" type="checkbox"> ウォールあり（位置を手動指定）</label></div>
+<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch iphone-sort-controls">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div id="searchHistory" class="search-history" hidden aria-label="最近の検索履歴"><span class="search-history-title">最近の検索</span><div id="searchHistoryList" class="search-history-list" aria-label="過去5件の検索盤面"></div><button id="searchHistoryClear" class="search-history-clear" type="button" aria-label="検索履歴をすべて削除">履歴削除</button></div>
+<div class="row" style="margin:9px 0 0"><label class="switch"><input id="wallMode" type="checkbox"> ウォールあり（位置を手動指定）</label></div>
 <div id="wallControls" class="wall-controls" hidden>
  <div class="wall-tip">ウォールがあるマスをタップしてください（複数選択可）。ウォールのマスは左右両方の言葉に含み、ウォールをまたぐ言葉は候補から除外します。</div>
  <div id="wallPositionGrid" class="wall-position-grid" role="group" aria-label="ウォールがあるマスを選択"></div>
@@ -792,6 +803,71 @@ function updateBoardPresentation(){
  }
  el('boardLength').textContent=`${[...text].length}文字（空欄${[...text].filter(c=>c==='○').length}マス）`;
 }
+// Search history is device-local; a stable board is saved 10 seconds after editing.
+const searchHistoryKey='kotodaman-board-search-history-v1';
+const searchHistoryDelay=10000;
+let searchHistoryTimer=0;
+let lastHistoryInput='';
+let searchHistory=[];
+function historyBoard(value){
+ const v=boardPattern(value).join('');
+ const len=[...v].length;
+ return len>=2&&len<=7&&[...v].every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c))?v:'';
+}
+try{
+ const stored=JSON.parse(localStorage.getItem(searchHistoryKey)||'[]');
+ if(Array.isArray(stored))searchHistory=[...new Set(stored.map(historyBoard).filter(Boolean))].slice(0,5);
+}catch(e){}
+function renderSearchHistory(){
+ const container=el('searchHistory'),list=el('searchHistoryList');
+ container.hidden=!searchHistory.length;
+ list.replaceChildren();
+ const current=boardPattern(boardField.value).join('');
+ for(const value of searchHistory){
+  const button=document.createElement('button');button.type='button';
+  button.className='search-history-item'+(current===value?' is-current':'');
+  button.textContent=value;button.title='この盤面で検索';
+  button.addEventListener('click',()=>{
+   clearTimeout(searchHistoryTimer);
+   clearTimeout(searchTimer);
+   boardComposing=false;
+   boardField.value=value;
+   lastHistoryInput=value;
+   commitBoardInput();
+   mobileResultLimit=8;
+   search();
+   saveSearchHistory(value);
+  });
+  list.append(button);
+ }
+}
+function saveSearchHistory(value){
+ const normalized=historyBoard(value);
+ if(!normalized)return;
+ searchHistory=[normalized,...searchHistory.filter(v=>v!==normalized)].slice(0,5);
+ try{localStorage.setItem(searchHistoryKey,JSON.stringify(searchHistory))}catch(e){console.warn('検索履歴を保存できませんでした',e)}
+ renderSearchHistory();
+}
+function queueSearchHistory(){
+ if(boardComposing)return;
+ const current=boardPattern(boardField.value).join('');
+ if(current===lastHistoryInput)return;
+ lastHistoryInput=current;
+ clearTimeout(searchHistoryTimer);
+ const candidate=historyBoard(current);
+ if(!candidate)return;
+ searchHistoryTimer=setTimeout(()=>{
+  if(!boardComposing&&historyBoard(boardField.value)===candidate)saveSearchHistory(candidate);
+ },searchHistoryDelay);
+}
+el('searchHistoryClear').addEventListener('click',()=>{
+ if(!confirm('この端末の検索履歴5件をすべて削除しますか？'))return;
+ clearTimeout(searchHistoryTimer);
+ searchHistory=[];
+ try{localStorage.removeItem(searchHistoryKey)}catch(e){}
+ renderSearchHistory();
+});
+renderSearchHistory();
 let searchTimer=0;
 let mobileResultLimit=8;
 function invalidateSearchResults(){
@@ -836,13 +912,15 @@ boardField.addEventListener('beforeinput',e=>{
   const end=boardField.selectionEnd??begin;
   boardField.setRangeText('○'.repeat([...e.data].length),begin,end,'end');
   commitBoardInput();
+  scheduleSearch();
+  queueSearchHistory();
  }
 });
-boardField.addEventListener('compositionstart',()=>{boardComposing=true;clearTimeout(searchTimer);invalidateSearchResults()});
-boardField.addEventListener('compositionend',()=>{boardComposing=false;commitBoardInput();scheduleSearch(220)});
-boardField.addEventListener('input',()=>{commitBoardInput();if(boardComposing){clearTimeout(searchTimer);invalidateSearchResults()}else scheduleSearch()});
-boardField.addEventListener('change',()=>{commitBoardInput();scheduleSearch(0)});
-el('insertBlank').addEventListener('click',()=>{insertBoardBlank();scheduleSearch(0)});
+boardField.addEventListener('compositionstart',()=>{boardComposing=true;clearTimeout(searchTimer);clearTimeout(searchHistoryTimer);invalidateSearchResults()});
+boardField.addEventListener('compositionend',()=>{boardComposing=false;commitBoardInput();scheduleSearch(220);queueSearchHistory()});
+boardField.addEventListener('input',()=>{commitBoardInput();if(boardComposing){clearTimeout(searchTimer);invalidateSearchResults()}else{scheduleSearch();queueSearchHistory()}});
+boardField.addEventListener('change',()=>{commitBoardInput();scheduleSearch(0);queueSearchHistory()});
+el('insertBlank').addEventListener('click',()=>{insertBoardBlank();scheduleSearch(0);queueSearchHistory()});
 updateBoardPresentation();
 // Manual wall-marker. The OCR pipeline should not attempt wall detection.
 wallMode=el('wallMode');
@@ -1068,7 +1146,7 @@ function search(){
  }
  if(res.length>300){const p=document.createElement('p');p.className='hint';p.textContent=mobileResults?'候補が多いため、最大300件まで表示できます。':'結果が多いため、上位300語を表示しています。';root.append(p)}
 }
-el('onlyDeck').onchange=()=>search();el('preferHand').onchange=()=>search();el('sortMode').onchange=()=>search();el('search').onclick=()=>search();el('reset').onclick=()=>{clearTimeout(searchTimer);boardComposing=false;boardField.value='';wallMode.checked=false;wallCells.clear();renderWallPositionButtons();mobileResultLimit=8;commitBoardInput();search()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();search()}});
+el('onlyDeck').onchange=()=>search();el('preferHand').onchange=()=>search();el('sortMode').onchange=()=>search();el('search').onclick=()=>search();el('reset').onclick=()=>{clearTimeout(searchTimer);clearTimeout(searchHistoryTimer);boardComposing=false;boardField.value='';lastHistoryInput='';wallMode.checked=false;wallCells.clear();renderWallPositionButtons();mobileResultLimit=8;commitBoardInput();search();renderSearchHistory()};boardField.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();search()}});
 // iOS Safari can occasionally miss a composition/input/change notification.
 // Even if an event is missed, prevent 5-character search results from
 // remaining under a 7-character board. Work is performed only on a mismatch.
@@ -1131,6 +1209,7 @@ try{if(location.hash.startsWith('#deck=')){const d=fromUrlPayload(location.hash.
  commitBoardInput();
  mobileResultLimit=8;
  clearTimeout(searchTimer);
+ queueSearchHistory();
  // 辞書読み込み完了後は既存処理と監視で自動再検索される。
  setTimeout(()=>{search();try{document.getElementById('searchPanel').scrollIntoView({block:'start'})}catch(e){}},60);
 })();
