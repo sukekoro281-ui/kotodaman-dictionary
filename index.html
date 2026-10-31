@@ -328,8 +328,10 @@
 .search-history-item{flex:none;min-height:32px;padding:5px 10px;border:1px solid #c7d9f6;border-radius:9px;background:#eef5ff;color:#2456a2;font-size:13px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
 .search-history-item.is-current{background:#dbeafe;border-color:#78a9f5;color:#174ba5}
 .search-history-clear{flex:none;min-height:32px;padding:5px 8px;border-radius:8px;background:#eef0f4;color:#566579;font-size:11px;font-weight:600;white-space:nowrap}
+.search-history-clear[hidden]{display:none!important}
+.search-history-empty{font-size:12px;color:#718096;white-space:nowrap;align-self:center}
 @media(max-width:600px){.search-history{gap:5px;margin:5px 0 2px}.search-history-title{font-size:11px}.search-history-item{font-size:12px;min-height:32px;padding:5px 8px}.search-history-clear{font-size:11px;min-height:32px;padding:5px 7px}}
-</style><meta name="app-build" content="20261026-wordmaster-merged-v1"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div> <a href="update-history.html" style="display:inline-flex;align-items:center;gap:4px;margin:6px 0 0;color:#2563eb;font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px">更新履歴を見る</a>
+</style><meta name="app-build" content="20261031-search-history-fix2"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div> <a href="update-history.html" style="display:inline-flex;align-items:center;gap:4px;margin:6px 0 0;color:#2563eb;font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px">更新履歴を見る</a>
 
 
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2></div><div class="deck-top-layout"><div class="deck-fields"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select></div><div class="deck-actions" aria-label="デッキ操作"><div class="deck-action-row deck-action-primary"><button id="loadDeck" class="secondary" type="button">共有デッキを編集</button><div class="deck-action-group"><button class="secondary" id="saveDeck">全員に保存</button><button id="deleteDeck" class="danger" type="button">削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div></div><div class="deck-action-row deck-action-secondary"><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><div class="deck-action-group"><button class="secondary" id="clearHand" type="button">手札解除</button><button id="deckEditMode" class="secondary" type="button">カード編集</button></div></div></div></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラのカードをタップして最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
@@ -820,8 +822,15 @@ try{
 }catch(e){}
 function renderSearchHistory(){
  const container=el('searchHistory'),list=el('searchHistoryList');
- container.hidden=!searchHistory.length;
+ container.hidden=false;
+ el('searchHistoryClear').hidden=!searchHistory.length;
  list.replaceChildren();
+ if(!searchHistory.length){
+  const message=document.createElement('span');
+  message.className='search-history-empty';
+  message.textContent='入力後10秒で履歴に保存';
+  list.append(message);
+ }
  const current=boardPattern(boardField.value).join('');
  for(const value of searchHistory){
   const button=document.createElement('button');button.type='button';
@@ -829,6 +838,7 @@ function renderSearchHistory(){
   button.textContent=value;button.title='この盤面で検索';
   button.addEventListener('click',()=>{
    clearTimeout(searchHistoryTimer);
+   searchHistoryTimer=0;
    clearTimeout(searchTimer);
    boardComposing=false;
    boardField.value=value;
@@ -851,18 +861,24 @@ function saveSearchHistory(value){
 function queueSearchHistory(){
  if(boardComposing)return;
  const current=boardPattern(boardField.value).join('');
- if(current===lastHistoryInput)return;
- lastHistoryInput=current;
- clearTimeout(searchHistoryTimer);
  const candidate=historyBoard(current);
+ // Composition events can cancel a pending timer without changing the board.
+ // Re-arm it even when the text matches lastHistoryInput.
+ if(current===lastHistoryInput && searchHistoryTimer)return;
+ if(current===lastHistoryInput && !searchHistoryTimer && candidate && searchHistory[0]===candidate)return;
+ clearTimeout(searchHistoryTimer);
+ searchHistoryTimer=0;
+ lastHistoryInput=current;
  if(!candidate)return;
  searchHistoryTimer=setTimeout(()=>{
+  searchHistoryTimer=0;
   if(!boardComposing&&historyBoard(boardField.value)===candidate)saveSearchHistory(candidate);
  },searchHistoryDelay);
 }
 el('searchHistoryClear').addEventListener('click',()=>{
  if(!confirm('この端末の検索履歴5件をすべて削除しますか？'))return;
  clearTimeout(searchHistoryTimer);
+ searchHistoryTimer=0;
  searchHistory=[];
  try{localStorage.removeItem(searchHistoryKey)}catch(e){}
  renderSearchHistory();
@@ -916,7 +932,7 @@ boardField.addEventListener('beforeinput',e=>{
   queueSearchHistory();
  }
 });
-boardField.addEventListener('compositionstart',()=>{boardComposing=true;clearTimeout(searchTimer);clearTimeout(searchHistoryTimer);invalidateSearchResults()});
+boardField.addEventListener('compositionstart',()=>{boardComposing=true;clearTimeout(searchTimer);clearTimeout(searchHistoryTimer);searchHistoryTimer=0;invalidateSearchResults()});
 boardField.addEventListener('compositionend',()=>{boardComposing=false;commitBoardInput();scheduleSearch(220);queueSearchHistory()});
 boardField.addEventListener('input',()=>{commitBoardInput();if(boardComposing){clearTimeout(searchTimer);invalidateSearchResults()}else{scheduleSearch();queueSearchHistory()}});
 boardField.addEventListener('change',()=>{commitBoardInput();scheduleSearch(0);queueSearchHistory()});
