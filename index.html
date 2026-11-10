@@ -331,7 +331,25 @@
 .search-history-clear[hidden]{display:none!important}
 .search-history-empty{font-size:12px;color:#718096;white-space:nowrap;align-self:center}
 @media(max-width:600px){.search-history{gap:5px;margin:5px 0 2px}.search-history-title{font-size:11px}.search-history-item{font-size:12px;min-height:32px;padding:5px 8px}.search-history-clear{font-size:11px;min-height:32px;padding:5px 7px}}
-</style><meta name="app-build" content="20261031-search-history-fix2"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div> <a href="update-history.html" style="display:inline-flex;align-items:center;gap:4px;margin:6px 0 0;color:#2563eb;font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px">更新履歴を見る</a>
+
+/* Two-word overlap combinations, independent of the normal whole-board matches. */
+.compound-panel{margin:12px 0 15px;border:1px solid #cbdcf6;border-radius:12px;background:#f8fbff;padding:11px 12px}
+.compound-panel[hidden]{display:none!important}
+.compound-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.compound-head strong{font-size:14px;color:#23466f}
+.compound-help{font-size:11px;color:#66758b;line-height:1.5}
+.compound-count{font-size:11px;color:#355f9b;background:#e4eeff;border-radius:6px;padding:3px 7px;font-weight:700}
+.compound-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:7px;margin-top:8px}
+.compound-card{background:#fff;border:1px solid #dce7f5;border-radius:10px;padding:9px 10px;min-width:0}
+.compound-card-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.compound-full{font-size:18px;font-weight:750;letter-spacing:.035em;overflow-wrap:anywhere}
+.compound-meta{font-size:10px;background:#e9eef7;border-radius:6px;padding:3px 5px;color:#455d80;white-space:nowrap}
+.compound-pair{font-size:13px;line-height:1.6;margin-top:4px;overflow-wrap:anywhere}
+.compound-first{color:#2456a2;font-weight:700}.compound-second{color:#08745d;font-weight:700}
+.compound-foot{font-size:11px;color:#64748b;margin-top:3px}
+.compound-more{display:block;margin:9px auto 0;background:#e8f0ff;color:#2357a5;font-size:12px;padding:7px 12px;min-height:32px}
+@media(max-width:600px){.compound-panel{padding:9px;margin:9px 0}.compound-grid{grid-template-columns:1fr;gap:6px}.compound-card{padding:8px}.compound-full{font-size:17px}}
+</style><meta name="app-build" content="20261110-overlap-combos"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div> <a href="update-history.html" style="display:inline-flex;align-items:center;gap:4px;margin:6px 0 0;color:#2563eb;font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px">更新履歴を見る</a>
 
 
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2></div><div class="deck-top-layout"><div class="deck-fields"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select></div><div class="deck-actions" aria-label="デッキ操作"><div class="deck-action-row deck-action-primary"><button id="loadDeck" class="secondary" type="button">共有デッキを編集</button><div class="deck-action-group"><button class="secondary" id="saveDeck">全員に保存</button><button id="deleteDeck" class="danger" type="button">削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div></div><div class="deck-action-row deck-action-secondary"><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><div class="deck-action-group"><button class="secondary" id="clearHand" type="button">手札解除</button><button id="deckEditMode" class="secondary" type="button">カード編集</button></div></div></div></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラのカードをタップして最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
@@ -343,7 +361,11 @@
  <div class="wall-tip">ウォールがあるマスをタップしてください（複数選択可）。ウォールのマスは左右両方の言葉に含み、ウォールをまたぐ言葉は候補から除外します。</div>
  <div id="wallPositionGrid" class="wall-position-grid" role="group" aria-label="ウォールがあるマスを選択"></div>
  <div id="wallStatus" class="hint" aria-live="polite" style="margin-top:7px">ウォール位置を選択してください。</div>
-</div><p class="hint" id="mergedWordStatus">ゲーム内WordMaster統合辞書を自動読み込みします（一般辞書なし）。</p><p id="status" class="hint" aria-live="polite">統合辞書を読み込み中…</p><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
+</div><p class="hint" id="mergedWordStatus">ゲーム内WordMaster統合辞書を自動読み込みします（一般辞書なし）。</p><p id="status" class="hint" aria-live="polite">統合辞書を読み込み中…</p><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><section id="compoundPanel" class="compound-panel" hidden aria-label="複合ワード候補">
+<div class="compound-head"><strong>複合ワード候補</strong><span id="compoundCount" class="compound-count">6・7マス対応</span></div>
+<div class="compound-help">5＋5 / 5＋6 / 6＋5文字の2語が重なる組み合わせ。7マス中6マスだけ使う候補も表示します。辞書収録語の組み合わせで、ゲーム内成立は未確認です。</div>
+<div id="compoundResult" aria-live="polite"></div>
+</section><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
 <section class="panel" id="dictionaryPanel"><div class="head"><h2>③ ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">WordMaster由来の読みを統合した辞書を自動で読み込みます。一般辞書（JMdict）を使いません。ゲームデータへの収録と実際の成立は完全には同義とは限りません。</p></section>
 <section class="panel" id="supplementPanel"><details class="manual-words"><summary>辞書の不足語を補完 <span class="tab" id="extraBadge">追加 0語</span></summary><div class="manual-words-content">
 <p class="hint">ゲーム内で成立を確認した言葉を登録できます。追加語は検索候補・部分語・予測コンボに反映され、この端末に保存されます。他の端末や友人へはTXTを書き出して渡せます。</p>
@@ -437,6 +459,7 @@ function normalizeSlotData(x){
  return {name:String(x?.name||'').slice(0,100),chars:String(x?.chars||'').slice(0,120),
  attribute:String(x?.attribute||''),image:String(x?.image||''),url:String(x?.url||''),version:String(x?.version||'')};
 }
+let compoundCachedKey=null,compoundCachedResults=[];
 const el=id=>document.getElementById(id), key='kotodaman-decks-v1';let words=[],baseWords=[],wordSet=new Set(),wordsByLength=new Map(),gameWordSet=new Set(),generalWordSet=new Set(),source='',slots=Array.from({length:12},()=>({name:'',chars:''}));
 const handKey='kotodaman-active-hand-v1';let activeHand=[];
 function resetHand(){activeHand=[];renderHand();saveHand();search()}
@@ -647,6 +670,8 @@ let extraWords=[];
 let publicVerifiedWords=[];
 try { const persisted=JSON.parse(localStorage.getItem(extraKey)||'[]'); if(Array.isArray(persisted))extraWords=parseWords(persisted); } catch(e) {}
 function rebuildDictionary(){
+  // Invalidate overlapping-word candidates when the dictionary is rebuilt.
+  compoundCachedKey=null;
   const primary=[...baseWords,...referenceVerifiedWords,...publicVerifiedWords,...extraWords,...adjectiveSaFiveCandidates,...adjectiveSaSixSevenCandidates];
   gameWordSet=new Set(primary);
   generalWordSet=new Set();
@@ -1065,6 +1090,114 @@ function searchWall(pattern,root){
  }
  root.append(grid);
 }
+// Find two overlapping 5/6-character words covering 6 or 7 consecutive board cells.
+// A 6-cell combination may occupy cells 1-6 or 2-7; fixed cells outside it remain untouched.
+const compoundLayouts=[
+ {size:7,a:5,b:5,shift:2}, {size:7,a:5,b:6,shift:1}, {size:7,a:6,b:5,shift:2},
+ {size:6,a:5,b:5,shift:1}, {size:6,a:5,b:6,shift:0}, {size:6,a:6,b:5,shift:1}
+];
+let compoundVisibleLimit=8;
+function compoundFits(word,pattern,offset){
+ const letters=[...word];
+ for(let i=0;i<letters.length;i++)if(pattern[offset+i]!=='○'&&pattern[offset+i]!==letters[i])return false;
+ return true;
+}
+function findCompoundWords(pattern){
+ const deck=options(),handDeck=deck.filter(c=>activeHand.includes(c.id));
+ const onlyDeck=el('onlyDeck').checked,preferHand=el('preferHand').checked&&activeHand.length>0;
+ const result=[],seen=new Set(),assignmentCache=new Map();
+ if(onlyDeck&&!deck.length)return result;
+ for(const layout of compoundLayouts){
+  for(let base=0;base<=7-layout.size;base++){
+   const aStart=base,bStart=base+layout.shift,overlap=layout.a-layout.shift;
+   const aList=wordsByLength.get(layout.a)||[],bList=wordsByLength.get(layout.b)||[];
+   const bMap=new Map();
+   for(const b of bList){
+    if(!compoundFits(b,pattern,bStart))continue;
+    const key=[...b].slice(0,overlap).join('');
+    if(!bMap.has(key))bMap.set(key,[]);
+    bMap.get(key).push(b);
+   }
+   const found=[];
+   // A bounded shortlist keeps searches responsive even when every tile is blank.
+   let examined=0;
+   outer:for(const a of aList){
+    if(!compoundFits(a,pattern,aStart))continue;
+    const overlapKey=[...a].slice(layout.shift).join('');
+    const possible=bMap.get(overlapKey);
+    if(!possible)continue;
+    for(const b of possible){
+     const full=[...pattern];
+     [...a].forEach((c,i)=>{full[aStart+i]=c});
+     [...b].forEach((c,i)=>{full[bStart+i]=c});
+     const combined=full.slice(base,base+layout.size).join('');
+     const key=[layout.size,base,a,b].join('|');
+     if(seen.has(key))continue;
+     seen.add(key);
+     const needed=[];
+     for(let i=0;i<7;i++)if(pattern[i]==='○'&&full[i]!=='○')needed.push({position:i+1,char:full[i]});
+     const fullKey=full.join('');
+     let assignment=assignmentCache.get(fullKey);
+     if(!assignment){
+      assignment={buildable:!!(deck.length&&assign(needed,deck)),handPossible:!!(handDeck.length&&assign(needed,handDeck))};
+      assignmentCache.set(fullKey,assignment);
+     }
+     if(onlyDeck&&!assignment.buildable)continue;
+     found.push({a,b,full:combined,size:layout.size,base,overlap,buildable:assignment.buildable,handPossible:assignment.handPossible,score:predictCombos(combined).count});
+     examined++;
+     if(examined>=240)break outer;
+    }
+   }
+   found.sort((x,y)=>
+    (preferHand?Number(y.handPossible)-Number(x.handPossible):0)||
+    Number(y.buildable)-Number(x.buildable)||y.score-x.score||x.full.localeCompare(y.full,'ja')
+   );
+   result.push(...found.slice(0,16));
+  }
+ }
+ result.sort((x,y)=>y.size-x.size||
+  (preferHand?Number(y.handPossible)-Number(x.handPossible):0)||
+  Number(y.buildable)-Number(x.buildable)||y.score-x.score||x.full.localeCompare(y.full,'ja'));
+ return result;
+}
+function renderCompoundResults(pattern){
+ const panel=el('compoundPanel'),root=el('compoundResult');
+ panel.hidden=true;root.replaceChildren();
+ if(!words.length||pattern.length!==7||!pattern.every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c)))return;
+ panel.hidden=false;
+ if(wallMode?.checked){root.textContent='ウォールありの盤面では複合ワード候補は表示しません。';return}
+ const cacheKey=JSON.stringify([pattern.join(''),el('onlyDeck').checked,el('preferHand').checked,activeHand,options(),words.length]);
+ const results=cacheKey===compoundCachedKey?compoundCachedResults:findCompoundWords(pattern);
+ if(cacheKey!==compoundCachedKey){compoundCachedKey=cacheKey;compoundCachedResults=results;}
+ const badge=el('compoundCount');badge.textContent=results.length?`${results.length}件の候補（各配置 最大16件）`:'候補なし';
+ if(!results.length){
+  const msg=document.createElement('div');msg.className='compound-help';msg.style.marginTop='8px';
+  msg.textContent=el('onlyDeck').checked?'デッキで作れる組み合わせはありません。絞り込みを解除すると辞書候補も表示します。':'条件に合う5＋5・5＋6・6＋5文字の組み合わせは見つかりませんでした。';
+  root.append(msg);return;
+ }
+ const grid=document.createElement('div');grid.className='compound-grid';
+ for(const item of results.slice(0,compoundVisibleLimit)){
+  const card=document.createElement('div');card.className='compound-card';
+  const top=document.createElement('div');top.className='compound-card-top';
+  const full=document.createElement('span');full.className='compound-full';full.textContent=item.full;
+  const meta=document.createElement('span');meta.className='compound-meta';meta.textContent=`${[...item.a].length}＋${[...item.b].length} / ${item.size}マス`;
+  top.append(full,meta);
+  const pair=document.createElement('div');pair.className='compound-pair';
+  const a=document.createElement('span');a.className='compound-first';a.textContent=item.a;
+  const b=document.createElement('span');b.className='compound-second';b.textContent=item.b;
+  pair.append(a,document.createTextNode(' ＋ '),b);
+  const foot=document.createElement('div');foot.className='compound-foot';
+  foot.textContent=`共通${item.overlap}文字 ／ 使用位置 ${item.base+1}〜${item.base+item.size}マス ／ 予想コンボ ${item.score}${item.buildable?' ／ デッキで作れる':''}${item.handPossible?' ／ 手札で作れる':''}`;
+  card.append(top,pair,foot);grid.append(card);
+ }
+ root.append(grid);
+ if(results.length>compoundVisibleLimit){
+  const more=document.createElement('button');more.type='button';more.className='compound-more';
+  more.textContent=`さらに表示（${Math.min(compoundVisibleLimit,results.length)} / ${results.length}件）`;
+  more.addEventListener('click',()=>{compoundVisibleLimit+=12;renderCompoundResults(pattern)});
+  root.append(more);
+ }
+}
 function search(){
  const root=el('result');root.replaceChildren();
  commitBoardInput();
@@ -1072,6 +1205,7 @@ function search(){
  const pattern=boardPattern(boardField.value);
  lastSearchedBoard=pattern.join('');
  root.dataset.searchedBoard=lastSearchedBoard;
+ renderCompoundResults(pattern);
  if(!words.length){root.className='notice';root.textContent='辞書を読み込み中です。読み込めない場合は「公開辞書を読み込む」を押してください。';return}
  if(!pattern.length){root.className='notice';root.textContent='盤面を入力してください。';return}
  if(!pattern.every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c))){root.className='notice';root.textContent='ひらがなと「○」で盤面を入力してください。';return}
