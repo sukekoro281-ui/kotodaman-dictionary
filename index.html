@@ -335,7 +335,12 @@
 /* Two-word overlap combinations, independent of the normal whole-board matches. */
 .compound-panel{margin:12px 0 15px;border:1px solid #cbdcf6;border-radius:12px;background:#f8fbff;padding:11px 12px}
 .compound-panel[hidden]{display:none!important}
-.compound-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.compound-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer;list-style:none;user-select:none;touch-action:manipulation}
+.compound-head::-webkit-details-marker{display:none}
+.compound-head::before{content:'▸';font-size:15px;font-weight:700;color:#2563eb;flex:none}
+.compound-details[open]>.compound-head{margin-bottom:9px}
+.compound-details[open]>.compound-head::before{content:'▾'}
+.compound-head:focus-visible{outline:2px solid #2563eb;outline-offset:4px;border-radius:4px}
 .compound-head strong{font-size:14px;color:#23466f}
 .compound-help{font-size:11px;color:#66758b;line-height:1.5}
 .compound-count{font-size:11px;color:#355f9b;background:#e4eeff;border-radius:6px;padding:3px 7px;font-weight:700}
@@ -349,22 +354,24 @@
 .compound-foot{font-size:11px;color:#64748b;margin-top:3px}
 .compound-more{display:block;margin:9px auto 0;background:#e8f0ff;color:#2357a5;font-size:12px;padding:7px 12px;min-height:32px}
 @media(max-width:600px){.compound-panel{padding:9px;margin:9px 0}.compound-grid{grid-template-columns:1fr;gap:6px}.compound-card{padding:8px}.compound-full{font-size:17px}}
-</style><meta name="app-build" content="20261110-overlap-combos"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div> <a href="update-history.html" style="display:inline-flex;align-items:center;gap:4px;margin:6px 0 0;color:#2563eb;font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px">更新履歴を見る</a>
+</style><meta name="app-build" content="20261112-history10-compound-toggle"><meta name="theme-color" content="#2563eb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="コトダマン辞書"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"></head><body><main class="wrap"><h1>コトダマン デッキことば検索</h1><div class="sub">キャラ名を選んで12体を登録。デッキの文字で作れる言葉を検索・共有できます。</div> <a href="update-history.html" style="display:inline-flex;align-items:center;gap:4px;margin:6px 0 0;color:#2563eb;font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px">更新履歴を見る</a>
 
 
 <section class="panel" id="deckPanel"><div class="notice" style="margin:0 0 14px;background:#ecfdf5;border-color:#a7f3d0;color:#065f46">共通デッキ一覧：登録したデッキは全員に自動で反映されます。ログイン不要で閲覧・編集できます。</div><div class="head"><h2>① デッキ・手札</h2></div><div class="deck-top-layout"><div class="deck-fields"><input id="deckName" placeholder="デッキ名（例：周回用）" class="grow" value="デッキ1"><select id="savedDecks" aria-label="保存済みデッキ"><option value="">みんなの保存済みデッキを選択</option></select></div><div class="deck-actions" aria-label="デッキ操作"><div class="deck-action-row deck-action-primary"><button id="loadDeck" class="secondary" type="button">共有デッキを編集</button><div class="deck-action-group"><button class="secondary" id="saveDeck">全員に保存</button><button id="deleteDeck" class="danger" type="button">削除</button><button id="clearDeck" class="secondary">12体をクリア</button></div></div><div class="deck-action-row deck-action-secondary"><span id="handCount" class="tab" aria-live="polite">手札 0/4</span><div class="deck-action-group"><button class="secondary" id="clearHand" type="button">手札解除</button><button id="deckEditMode" class="secondary" type="button">カード編集</button></div></div></div></div><span id="draftStatus" hidden></span><div class="deck-info-line"><span id="handStatus" class="hint" aria-live="polite">キャラのカードをタップして最大4体を選択</span><span class="catalog-badge" id="catalogCount"></span></div><p class="hint" id="publicDeckStatus" aria-live="polite">共通デッキ一覧を読み込み中です。端末内の既存デッキは消えません。</p><div id="deck" class="grid"></div></section>
 <section class="panel" id="searchPanel"><h2>② 盤面を入力して検索</h2>
 <p class="hint" style="margin-top:-5px">空欄はスペースキーで入力できます（半角・全角に対応）。入力した空欄は青い「○」で表示します。iPhoneでは「○ 空欄」ボタンも使えます。</p>
-<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch iphone-sort-controls">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div id="searchHistory" class="search-history" hidden aria-label="最近の検索履歴"><span class="search-history-title">最近の検索</span><div id="searchHistoryList" class="search-history-list" aria-label="過去5件の検索盤面"></div><button id="searchHistoryClear" class="search-history-clear" type="button" aria-label="検索履歴をすべて削除">履歴削除</button></div>
+<div class="row"><div class="board-shell"><div id="boardMirror" class="board-mirror" aria-hidden="true"></div><input id="board" class="board" type="text" value="" maxlength="12" aria-label="盤面。空欄はスペースまたは空欄ボタンで入力" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button id="insertBlank" class="blank-button" type="button" aria-label="カーソル位置に空欄を1文字挿入">○ 空欄</button><button id="search">検索</button><label class="switch"><input type="checkbox" id="onlyDeck"> デッキで作れる語のみ</label><label class="switch"><input type="checkbox" id="preferHand"> 手札で作れる言葉を先頭に</label><label class="switch iphone-sort-controls">並び替え <select id="sortMode" class="sort-selector"><option value="combo" selected>予測コンボ数が多い順（同数は五十音順）</option><option value="kana">五十音順</option></select></label><button id="reset" class="secondary">盤面を初期化</button></div><div id="searchHistory" class="search-history" hidden aria-label="最近の検索履歴"><span class="search-history-title">最近の検索</span><div id="searchHistoryList" class="search-history-list" aria-label="過去10件の検索盤面"></div><button id="searchHistoryClear" class="search-history-clear" type="button" aria-label="検索履歴をすべて削除">履歴削除</button></div>
 <div class="row" style="margin:9px 0 0"><label class="switch"><input id="wallMode" type="checkbox"> ウォールあり（位置を手動指定）</label></div>
 <div id="wallControls" class="wall-controls" hidden>
  <div class="wall-tip">ウォールがあるマスをタップしてください（複数選択可）。ウォールのマスは左右両方の言葉に含み、ウォールをまたぐ言葉は候補から除外します。</div>
  <div id="wallPositionGrid" class="wall-position-grid" role="group" aria-label="ウォールがあるマスを選択"></div>
  <div id="wallStatus" class="hint" aria-live="polite" style="margin-top:7px">ウォール位置を選択してください。</div>
 </div><p class="hint" id="mergedWordStatus">ゲーム内WordMaster統合辞書を自動読み込みします（一般辞書なし）。</p><p id="status" class="hint" aria-live="polite">統合辞書を読み込み中…</p><div id="boardPreviewLetters" hidden aria-hidden="true"></div><span id="boardLength" hidden aria-hidden="true"></span><section id="compoundPanel" class="compound-panel" hidden aria-label="複合ワード候補">
-<div class="compound-head"><strong>複合ワード候補</strong><span id="compoundCount" class="compound-count">6・7マス対応</span></div>
+<details id="compoundDetails" class="compound-details">
+<summary class="compound-head"><strong>複合ワード候補</strong><span id="compoundCount" class="compound-count">6・7マス対応</span></summary>
 <div class="compound-help">5＋5 / 5＋6 / 6＋5文字の2語が重なる組み合わせ。7マス中6マスだけ使う候補も表示します。辞書収録語の組み合わせで、ゲーム内成立は未確認です。</div>
 <div id="compoundResult" aria-live="polite"></div>
+</details>
 </section><div id="result" class="notice">辞書を読み込むと検索結果が表示されます。</div></section>
 <section class="panel" id="dictionaryPanel"><div class="head"><h2>③ ことば辞書</h2><span id="dictBadge" class="tab">未読み込み</span></div><p class="hint">WordMaster由来の読みを統合した辞書を自動で読み込みます。一般辞書（JMdict）を使いません。ゲームデータへの収録と実際の成立は完全には同義とは限りません。</p></section>
 <section class="panel" id="supplementPanel"><details class="manual-words"><summary>辞書の不足語を補完 <span class="tab" id="extraBadge">追加 0語</span></summary><div class="manual-words-content">
@@ -843,7 +850,7 @@ function historyBoard(value){
 }
 try{
  const stored=JSON.parse(localStorage.getItem(searchHistoryKey)||'[]');
- if(Array.isArray(stored))searchHistory=[...new Set(stored.map(historyBoard).filter(Boolean))].slice(0,5);
+ if(Array.isArray(stored))searchHistory=[...new Set(stored.map(historyBoard).filter(Boolean))].slice(0,10);
 }catch(e){}
 function renderSearchHistory(){
  const container=el('searchHistory'),list=el('searchHistoryList');
@@ -879,7 +886,7 @@ function renderSearchHistory(){
 function saveSearchHistory(value){
  const normalized=historyBoard(value);
  if(!normalized)return;
- searchHistory=[normalized,...searchHistory.filter(v=>v!==normalized)].slice(0,5);
+ searchHistory=[normalized,...searchHistory.filter(v=>v!==normalized)].slice(0,10);
  try{localStorage.setItem(searchHistoryKey,JSON.stringify(searchHistory))}catch(e){console.warn('検索履歴を保存できませんでした',e)}
  renderSearchHistory();
 }
@@ -901,7 +908,7 @@ function queueSearchHistory(){
  },searchHistoryDelay);
 }
 el('searchHistoryClear').addEventListener('click',()=>{
- if(!confirm('この端末の検索履歴5件をすべて削除しますか？'))return;
+ if(!confirm('この端末の検索履歴10件をすべて削除しますか？'))return;
  clearTimeout(searchHistoryTimer);
  searchHistoryTimer=0;
  searchHistory=[];
@@ -1161,10 +1168,12 @@ function findCompoundWords(pattern){
  return result;
 }
 function renderCompoundResults(pattern){
- const panel=el('compoundPanel'),root=el('compoundResult');
+ const panel=el('compoundPanel'),root=el('compoundResult'),details=el('compoundDetails');
  panel.hidden=true;root.replaceChildren();
  if(!words.length||pattern.length!==7||!pattern.every(c=>c==='○'||/^[ぁ-ゖー]$/.test(c)))return;
  panel.hidden=false;
+ // Keep the panel closed by default and defer expensive combination search until opened.
+ if(!details.open){el('compoundCount').textContent='6・7マス対応';return;}
  if(wallMode?.checked){root.textContent='ウォールありの盤面では複合ワード候補は表示しません。';return}
  const cacheKey=JSON.stringify([pattern.join(''),el('onlyDeck').checked,el('preferHand').checked,activeHand,options(),words.length]);
  const results=cacheKey===compoundCachedKey?compoundCachedResults:findCompoundWords(pattern);
@@ -1198,6 +1207,10 @@ function renderCompoundResults(pattern){
   root.append(more);
  }
 }
+el('compoundDetails').addEventListener('toggle',()=>{
+ // When opened, calculate the candidates for the current board without re-running normal search.
+ if(el('compoundDetails').open)renderCompoundResults(boardPattern(boardField.value));
+});
 function search(){
  const root=el('result');root.replaceChildren();
  commitBoardInput();
